@@ -2,22 +2,6 @@
 <div class="p-6">
   <h1 class="text-3xl font-bold mb-6">Tableau de bord professeur</h1>
 
-  <!-- Section Revenus -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-    <div class="bg-white p-6 rounded-2xl shadow-md">
-      <h2 class="text-xl font-semibold mb-2">Mes Revenus</h2>
-      <canvas id="revenueChart" class="w-full h-64"></canvas>
-    </div>
-
-    <div class="bg-white p-6 rounded-2xl shadow-md flex flex-col justify-between">
-      <div>
-        <h3 class="text-lg font-medium">Dernier retrait</h3>
-        <p class="text-gray-600 text-2xl mt-2 mb-4">$<%= lastWithdrawalAmount %> - <%= lastWithdrawalDate %></p>
-      </div>
-      <button class="bg-blue-600 text-white py-2 px-4 rounded-xl hover:bg-blue-700">Effectuer un retrait</button>
-    </div>
-  </div>
-
   <!-- Section Cours -->
   <div class="bg-white p-6 rounded-2xl shadow-md mb-8">
     <h2 class="text-xl font-semibold mb-4">Mes Cours</h2> </br></br>
@@ -38,26 +22,124 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  const ctx = document.getElementById('revenueChart');
-  const revenueChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: <%- JSON.stringify(revenueLabels) %>,
-      datasets: [{
-        label: 'Revenus ($)',
-        data: <%- JSON.stringify(revenueData) %>,
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.2)',
-        tension: 0.3
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: { beginAtZero: true }
-      }
+<style>
+/* Importation de polices Google Fonts pour un look moderne et lisible */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Roboto:wght@300;400;500;700&display=swap');
+
+/* Styles généraux pour le corps de la page */
+body {
+    font-family: 'Roboto', sans-serif; /* Police principale plus lisible pour le corps */
+    background-color: #f0f2f5; /* Un gris clair doux pour l'arrière-plan */
+    color: #333; /* Couleur de texte par défaut */
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased; /* Lissage des polices pour un meilleur rendu */
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Styles pour les titres */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif; /* Une police plus distinctive pour les titres */
+    color: #2c3e50; /* Un bleu-gris foncé pour les titres */
+}
+
+h1 {
+    border-bottom: 2px solid #e0e0e0; /* Ligne de séparation subtile sous le titre principal */
+    padding-bottom: 15px;
+    margin-bottom: 30px !important; /* Augmente l'espace après le h1 */
+}
+
+/* Affiner les conteneurs principaux */
+.p-6 {
+    max-width: 1200px; /* Limite la largeur du contenu pour une meilleure lisibilité sur grands écrans */
+    margin: 40px auto; /* Centre le contenu et ajoute de l'espace en haut et en bas */
+    padding: 30px; /* Augmente le padding interne */
+}
+
+/* Améliorations de la section principale des cours */
+.bg-white {
+    background-color: #ffffff;
+    border-radius: 16px; /* Arrondi légèrement plus grand */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Ombre plus douce et plus profonde */
+    padding: 30px; /* Plus de padding */
+    margin-bottom: 40px !important; /* Plus d'espace après la section */
+}
+
+/* Affiner les cartes de cours */
+.border.rounded-xl.p-4.shadow {
+    border: 1px solid #e5e7eb; /* Bordure légère */
+    border-radius: 12px; /* Arrondi légèrement plus grand pour les cartes individuelles */
+    background-color: #ffffff;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Transitions douces pour l'effet hover */
+    padding: 20px; /* Plus de padding à l'intérieur des cartes */
+}
+
+.border.rounded-xl.p-4.shadow:hover {
+    transform: translateY(-5px); /* Légère élévation au survol */
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12); /* Ombre plus marquée au survol */
+}
+
+/* Ajustements pour les liens */
+a {
+    text-decoration: none; /* Supprime le soulignement par défaut */
+    transition: color 0.2s ease-in-out; /* Transition de couleur au survol */
+}
+
+/* Couleurs des liens spécifiques */
+.text-yellow-600 {
+    color: #d97706; /* Jaune plus profond */
+    font-weight: 600; /* Plus épais */
+    margin-bottom: 20px; /* Espace après le lien ajouter cours */
+    display: inline-block; /* Pour que la marge fonctionne */
+}
+.text-yellow-600:hover {
+    color: #b45309;
+}
+
+.text-blue-600 {
+    color: #2563eb;
+    font-weight: 500;
+}
+.text-blue-600:hover {
+    color: #1d4ed8;
+}
+
+.text-purple-600 {
+    color: #7c3aed;
+    font-weight: 500;
+}
+.text-purple-600:hover {
+    color: #6d28d9;
+}
+
+.text-green-600 {
+    color: #16a34a;
+    font-weight: 500;
+}
+.text-green-600:hover {
+    color: #15803d;
+}
+
+/* Ajustements des marges et espacements */
+.mb-6 { margin-bottom: 25px !important; }
+.mb-4 { margin-bottom: 18px !important; }
+.mt-4 { margin-top: 15px !important; }
+
+/* Correction pour les br */
+.mb-4 + br + br {
+    display: none; /* Cache les balises <br><br> après le h2, si elles sont présentes pour espacement */
+}
+
+
+/* Responsive Design (Exemple basique, Tailwind gère déjà bien) */
+@media (max-width: 768px) {
+    .p-6 {
+        padding: 20px;
+        margin: 20px auto;
     }
-  });
-</script>
+    .bg-white {
+        padding: 20px;
+    }
+}
+</style>
