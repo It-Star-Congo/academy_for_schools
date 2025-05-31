@@ -1,0 +1,14 @@
+# Fichier render.yaml
+# Pour plus d'informations, voir https://render.com/docs/yaml-spec
+
+services:
+  - type: web # Définit le type de service : 'web' pour une application web
+    name: kelasi # Le nom de votre service (sera visible dans le tableau de bord Render)
+    env: node # L'environnement de runtime pour votre application (Node.js)
+    plan: free # Le plan d'hébergement (free, starter, standard, etc. - ajustez si nécessaire)
+    buildCommand: npm install # La commande pour installer les dépendances de votre projet
+    startCommand: node app.js # La commande pour démarrer votre application Node.js
+    envVars: # Variables d'environnement pour votre application
+      - key: NODE_ENV # Exemple de variable d'environnement
+        value: production
+      
