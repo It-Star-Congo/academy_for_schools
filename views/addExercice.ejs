@@ -1,0 +1,145 @@
+<div class="container">
+    <h1>Ajouter un Exercice</h1>
+    <form action="/exercise/add" method="POST" class="exercise-form">
+        <label for="title">Titre :</label>
+        <input type="text" name="title" id="title" placeholder="Titre de l'exercice" required>
+
+        <label for="course">Cours :</label>
+        <select name="course" id="course" required>
+            <option value="">Sélectionner un cours</option>
+            <% courses.forEach(course => { %>
+                <option value="<%= course.name %>"><%= course.name %></option>
+            <% }); %>
+        </select>
+
+        <label for="author">Autheur :</label>
+        <input type="text" name="author" id="author" placeholder="Autheur" required>
+
+        <label for="type">Type :</label>
+        <select name="type" id="type" onchange="toggleFields()">
+            <option value="vide">Choisir un type</option>
+            <option value="qcm">QCM</option>
+            <option value="programmation">Programmation</option>
+            <option value="redaction">Rédaction</option>
+        </select>
+
+        <label for="description">Description :</label>
+        <textarea name="description" id="description" placeholder="Description de l'exercice" required></textarea>
+
+        <label for="solution">Solution :</label>
+        <textarea name="solution" id="solution" placeholder="Solution attendue (si applicable)"></textarea>
+
+        <!-- Champs spécifiques à la programmation -->
+        <div id="programmingFields" style="display:none;">
+            <label for="starterCode">Code de départ :</label>
+            <textarea name="starterCode" id="starterCode" placeholder="Code de départ (si applicable)"></textarea>
+
+            <label for="expectedOutput">Sortie attendue :</label>
+            <textarea name="expectedOutput" id="expectedOutput" placeholder="Sortie attendue (si applicable)"></textarea>
+
+            <label for="testCases">Test Cases (JSON) :</label>
+            <textarea name="testCases" id="testCases" placeholder='[{"input": "1,2", "output": "3"}]'></textarea>
+        </div>
+
+        <!-- Champs spécifiques au QCM -->
+        <div id="qcmFields" style="display:none;">
+            <div id="questionsWrapper">
+                <div class="questionBlock">
+                    <label for="questions">Question 1 :</label>
+                    <input type="text" name="questions[0][question]" placeholder="Question">
+                    
+                    <label for="options">Options :</label>
+                    <textarea name="questions[0][options]" placeholder="Ex: Option1, Option2, Option3" ></textarea>
+                    
+                    <label for="correctAnswer">Réponse correcte :</label>
+                    <input type="text" name="questions[0][correctAnswer]" placeholder="Réponse correcte">
+                </div>
+            </div>
+            <button type="button" onclick="addQuestion()">Ajouter une question</button>
+        </div>
+
+        <!-- Champs spécifiques à la rédaction -->
+        <div id="essayFields" style="display:none;">
+            <label for="evaluationCriteria">Critères d'évaluation (JSON) :</label>
+            <textarea name="evaluationCriteria" id="evaluationCriteria" placeholder='{"clarté": 5, "argumentation": 5, "orthographe": 5}'></textarea>
+        </div>
+
+        <button type="submit" class="btne0">Ajouter</button>
+    </form>
+</div>
+
+<style>
+.container {
+    max-width: 800px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.exercise-form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.btne0 {
+    background: #007bff;
+    color: white;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    margin-top: 15px;
+    border-radius: 5px;
+}
+
+.btne0:hover {
+    background: #0056b3;
+}
+</style>
+
+<script>
+function toggleFields() {
+    const type = document.getElementById('type').value;
+    console.log("Type sélectionné :", type);
+    document.getElementById('programmingFields').style.display = (type === 'programmation') ? 'block' : 'none';
+    document.getElementById('qcmFields').style.display = (type === 'qcm') ? 'block' : 'none';
+    document.getElementById('essayFields').style.display = (type === 'redaction') ? 'block' : 'none';
+}
+
+// Fonction pour ajouter une nouvelle question au QCM
+function addQuestion() {
+    const questionCount = document.querySelectorAll('.questionBlock').length;
+    const questionWrapper = document.getElementById('questionsWrapper');
+    
+    const newQuestionBlock = document.createElement('div');
+    newQuestionBlock.classList.add('questionBlock');
+    
+    newQuestionBlock.innerHTML = `
+        <label for="questions">Question ${questionCount + 1} :</label>
+        <input type="text" name="questions[${questionCount}][question]" placeholder="Question">
+        
+        <label for="options">Options :</label>
+        <textarea name="questions[${questionCount}][options]" placeholder="Ex: Option1, Option2, Option3" required></textarea>
+        
+        <label for="correctAnswer">Réponse correcte :</label>
+        <input type="text" name="questions[${questionCount}][correctAnswer]" placeholder="Réponse correcte" required>
+    `;
+    
+    questionWrapper.appendChild(newQuestionBlock);
+}
+</script>
+

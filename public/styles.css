@@ -1,0 +1,303 @@
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+ 
+h1, h2 {
+color: #333;
+}
+
+form {
+margin: 20px 0;
+}
+
+textarea {
+width: 100%;
+height: 200px;
+}
+/* Styles généraux */
+
+/* Barre de navigation */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ff6600; /* Orange */
+    padding: 15px 30px;
+}
+
+.navbar .logo {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: white;
+}
+
+.nav-links {
+    list-style: none;
+    padding: 0;
+    display: flex;
+}
+
+.nav-links li {
+    margin: 0 15px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo-img {
+    height: 40px; /* Ajuste selon la taille souhaitée */
+    margin-right: 10px; /* Espace entre le logo et le texte */
+    padding: 10px;
+    border-radius: 50%;
+    background-color: white;
+}
+
+
+/* Contenu principal */
+.content {
+    padding: 30px;
+    text-align: center;
+}
+
+/* Page d'accueil */
+.home h1 {
+    color: #333;
+    font-size: 2.5rem;
+}
+
+.home p {
+    font-size: 1.2rem;
+    color: #555;
+    margin-top: 10px;
+}
+
+/* Bouton */
+.btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #ff6600;
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem;
+    border-radius: 5px;
+}
+
+/* Bouton noir */
+.btn20 {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #000000;
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem;
+    border-radius: 5px;
+}
+
+/* Bouton delete*/
+.btn-delete {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #ff0400;
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem;
+    border-radius: 5px;
+}
+
+.btn:hover {
+    background-color: #e55b00;
+}
+
+
+/* Conteneur des cours */
+.courses-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+/* Carte du cours (maintenant un <a>) */
+.course-card {
+    display: block;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    text-decoration: none; /* Supprime le soulignement du lien */
+    color: inherit; /* Garde la couleur du texte */
+}
+
+/* Image du cours */
+.course-card .course-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-bottom: 3px solid #ff6600;
+}
+
+/* Informations du cours */
+.course-info {
+    padding: 15px;
+    text-align: center;
+}
+
+.course-info h3 {
+    font-size: 1.4rem;
+    color: #333;
+    margin: 10px 0;
+}
+
+.course-info p {
+    font-size: 1rem;
+    color: #777;
+    margin-bottom: 10px;
+}
+
+/* Effet au survol */
+.course-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+    background-color: #fefefebe;
+    color: white; /* Change la couleur du texte */
+    border: 2px solid #ff6600;
+}
+
+.course-card:hover .course-info h3,
+.course-card:hover .course-info p {
+    color: #ff6600;
+}
+
+/* Conteneur du formulaire */
+.form-container {
+    max-width: 500px;
+    margin: 40px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Styles des labels */
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+/* Champs de texte */
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+/* Bouton de soumission */
+.btn-submit {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #ff6600;
+    color: white;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.btn-submit:hover {
+    background-color: #e55b00;
+}
+
+
+
+.exercise-container {
+    max-width: 800px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+.exercise-title {
+    font-size: 2rem;
+    color: #ff6600;
+    margin-bottom: 10px;
+}
+
+.exercise-description {
+    font-size: 1.2rem;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.code-editor textarea {
+    width: 100%;
+    height: 250px;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background: #f9f9f9;
+}
+
+.btne {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: #ff6600;
+    color: white;
+    padding: 10px;
+    margin-top: 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btne:hover {
+    background: #e55b00;
+}
+
+.result-box {
+    margin-top: 20px;
+    padding: 10px;
+    height: 50px;
+    width: 100;
+    border-radius: 5px;
+}
+
+.success {
+    color: green;
+}
+
+.error {
+    color: red;
+}

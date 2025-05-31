@@ -1,0 +1,230 @@
+
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+</head>
+
+<body>
+    <img id="form-logo" src="/pictures/AcademyLogoTransparent-removebg-preview.png" alt="Logo du site">
+    <div class="form-login" id="form-login">
+        <form action="/auth/register" method="POST" enctype="multipart/form-data">
+            <h3>S'enregistrer</h3></br>
+            <span class="alerteobligatoire"><strong>*</strong>   Champ obligatoire !</span>
+            <section class="identity">
+                <h4>1. Données personnelles</h4></br></br>
+                <label for="firstname">Prénom :  *</label>
+                <input type="text" name="firstname" placeholder="Prénom" required />
+                <label for="name">Nom :  *</label>
+                <input type="text" name="name" placeholder="Nom" required />
+                <label for="birthdate">Date de naissance :  *</label>
+                <input type="date" name="birthdate" required /></br></br>
+                <label>D'où venez vous ? (Choisissez votre pays) </label>
+                <select class="mboka" id="countrySelect" name="country"></select></br></br></br>
+                <label for="level">Quel est votre plus haut grade d'enseignement ?</label>
+                <select class="plomdi" id="level" name="level">
+                    <option value="">Sélectionnez un niveau</option>
+                    <option value="primaire">Primaire</option>
+                    <option value="college">Collège (Secondaire 1er cycle / Cycle d'orientation)</option>
+                    <option value="lycee">Lycée (Secondaire 2e cycle / Humanités)</option>
+                    <option value="professionnel">Enseignement professionnel ou technique</option>
+                    <option value="bachelier">Université (Licence / Bachelor)</option>
+                    <option value="master">Master</option>
+                    <option value="doctorat">Doctorat</option>
+                    <option value="aucun">Aucun diplôme</option>
+                </select>
+                </br></br></br>
+            </section>
+            <section class="identity">
+                <h4>2. Données de l'utilisateur</h4></br></br>
+                <label for="username">Nom d'utilisateur :  *</label>
+                <input type="text" name="username" placeholder="Nom d'utilisateur (Ex: Jojo_243)" required />
+                <label for="contact">Email/Telephone :  *</label>
+                <input type="text" name="contact" placeholder="Email/Telephone" /> </br></br>
+                <label for="image">Choisir une photo de profil :</label>
+                <input type="file" id="image" name="image" accept="image/*"></br>
+                <label for="password">Mot de passe :  *</label>
+                <input type="password" name="password" placeholder="Mot de passe" required />
+            </section></br></br>
+            <section class="identity">
+                <h4>3. Confidentialité et Consentement</h4><br><br>
+                <label>
+                    <input type="checkbox" name="privacy" required>
+                    J'accepte les <a href="/dashboard/confidence" class="check">règles de confidentialité</a> et la <a href="/dashboard/confidence" class="check">politique du site </a>. (Cliquez sur les liens pour accéder) *
+                </label></br>
+                <label>
+                    <input type="checkbox" name="offers">
+                    Je souhaite recevoir des bons plans, des avantages et des offres exclusives par mail.
+                </label></br></br>
+            </section>
+            <button type="submit">Register</button>
+        </form>
+    </div>
+
+
+
+    <style>
+        #form-logo {
+            display: block; /* Pour appliquer les marges auto */
+            margin: 20px auto; /* Centrage horizontal, marge supérieure et inférieure */
+            max-width: 100px; /* Ajustez la taille de l'image si nécessaire */
+            height: auto; /* Garde les proportions de l'image */
+        }
+        .alerteobligatoire{
+            padding: 5px;
+            font-size: 10px;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .form-login {
+            width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #ff6600;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background-color: #f9f9f9d8;
+        }
+
+        .form-login h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color : #ff6600;
+        }
+        .form-login h4 {
+            text-align: center;
+            margin-bottom: 5px;
+            /*border-bottom: 1px solid rgb(138, 127, 127);*/
+            background-color: #ff6600d7;
+            color: white;
+        }
+
+        .form-login label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-login input[type="text"],
+        .form-login input[type="date"],
+        .form-login input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+        .form-login select{
+            width: 350px;
+        }
+
+        .form-login button[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .form-login button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .custom-file-upload {
+            border: 1px solid #ccc;
+            display: inline-block;
+            padding: 6px 12px;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+
+        .custom-file-upload:hover {
+            background-color: #38303035;
+        }
+
+        label[for="level"] {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        select#level {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        select#level:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+    </style>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+
+    <script> 
+    
+
+    $(document).ready(function() {
+        // Charge tous les pays depuis l'API restcountries.com
+        $.ajax({
+            url: "https://restcountries.com/v3.1/all",
+            dataType: "json",
+            success: function(data) {
+                const countries = $.map(data, function(country) {
+                    const nomFrancais = country.translations.fra.common;
+                    return {
+                        id: country.name.common,
+                        text: nomFrancais,
+                        code: country.cca2
+                    };
+                });
+
+                // Initialise Select2
+                $("#countrySelect").select2({
+                    data: countries,
+                    matcher: function(params, data) {
+                        if ($.trim(params.term) === '') {
+                            return data;
+                        }
+
+                        if (data.text.toUpperCase().indexOf(params.term.toUpperCase()) > -1) {
+                            return data;
+                        }
+
+                        return null;
+                    }
+                });
+
+                // Obtient la localisation par adresse IP
+                $.ajax({
+                    url: "http://ip-api.com/json",
+                    dataType: "json",
+                    success: function(location) {
+                        if (location.country) {
+                            const pays = location.country;
+                            // Sélectionne le pays dans Select2
+                            const paysTrouve = countries.find(country => country.text === pays);
+                            if (paysTrouve) {
+                                $("#countrySelect").val(paysTrouve.id).trigger("change");
+                            }
+                        }
+                    },
+                    error: function() {
+                        console.error("Erreur de géolocalisation par adresse IP.");
+                    }
+                });
+            }
+        });
+    });
+    </script> 
+</body>

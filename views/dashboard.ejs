@@ -1,0 +1,15 @@
+<h1>Welcome, <%= user.username %></h1>
+<h2>All Courses</h2>
+
+<div class="courses-container">
+  <% courses.forEach(course => { %>
+    <a href="/exercise/course/<%= course.name %>" class="course-card">
+      <img src="<%= course.image %>" alt="Course Image" class="course-img">
+      <div class="course-info">
+        <h3><%= course.name %></h3>
+        <p>Prof: <%= course.teacher %></p>
+      </div>
+    <p class="description">Description: <%= course.description %></p>
+    </a>
+  <% }) %>
+</div>

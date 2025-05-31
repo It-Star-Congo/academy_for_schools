@@ -1,0 +1,482 @@
+
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT-Ac - <%= exercise.title %></title>
+    
+    <!-- CodeMirror CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.8/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.8/theme/dracula.min.css"> <!-- Choisir le thème -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/theme/neo.css"> <!-- Choisir le thème -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/theme/idea.css"> <!-- Choisir le thème -->
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.8/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.8/mode/python/python.min.js"></script>
+</head>
+<body>
+    <div class="exercise-container">
+         <!-- Sidebar -->
+         
+        <div class="sidebar" id="exerciseSidebar">
+            <div class="sidebar-header"  onclick="toggleSidebar()">
+                <span class = "barres">&#9776;</span> <!-- Icone des trois barres -->
+                <span>Informations sur l'exercice</span>
+            </div>
+            <div class="sidebar-content">
+                <h3 class="titre-ligne-orange"><%= exercise.title %></h3>
+                <p><strong>Auteur :</strong> <%= exercise.author %></p>
+                <p><strong>Date limite :</strong> <%= exercise.deadline %></p>
+                <p><strong>Poids de la note :</strong> <%= exercise.weight ? exercise.weight : 1 %></p>
+                <p><strong>Nombre d'essais :</strong> <%= exercise.attempts %></p>
+                <p><strong>Meilleure note :</strong> <%= exercise.bestScore %>/100</p>
+                
+                <div class="progress-bar-container2">
+                    <div class="progress-bar2" style="width: <%= exercise.bestScore %>%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bouton pour supprimer l'exercice -->
+        <% if (exercise && (user.username === exercise.author || user.username === 'test') ) { %>
+            <button class="btn-delete" onclick="deleteExercise('<%= exercise.id %>')">Supprimer l'exercice</button>
+        <% } %>
+
+        <h1 class="exercise-title"><%= exercise.title %></h1>
+        <p class="exercise-description"><%= exercise.description %></p>
+        <% if (exercise.type === 'programmation') { %>
+            <form id="programmationForm" data-type="programmationForm"></form>
+            <div class="code-editorUnwritable">
+                <textarea id="codeUnwritable" name="codeUnwritable" placeholder="Écris ton code ici..."><%= exercise.starterCode %></textarea>
+            </div>
+            
+            <div class="code-editor">
+                <textarea id="code" name="code" placeholder="Écris ton code ici..."></textarea>
+            </div>
+            <button class="btne" onclick="submitExercise(event)">Soumettre</button>
+            </form>
+        <% } else if (exercise.type === 'qcm') { %>
+            <h2>QCM</h2>
+            <form id="qcmForm" data-type="qcm">
+              <input type="hidden" name="exerciseId" value="<%= exercise.id %>">
+              
+              <% exercise.questions.forEach((question, index) => { %>
+                <h3><%= question.question %></h3>
+                <% question.options.forEach((option, optIndex) => { %>
+                  <label>
+                    <input type="radio" name="answer-<%= index %>" value="<%= option %>">
+                    <%= option %>
+                  </label><br>
+                <% }); %>
+              <% }); %>
+          
+              <button class="btne" onclick="submitExercise(event)">Soumettre</button>
+            </form>
+        <% } else if (exercise.type === 'redaction') { %>
+            <h2>Exercice de rédaction</h2>
+            <h3>Critères d'évaluation :</h3>
+            <ul>
+                <% for (let [critere, score] of Object.entries(exercise.evaluationCriteria)) { %>
+                <li><%= critere %> : <%= score %> points</li>
+                <% } %>
+            </ul>
+            
+            <form id="redactionForm" data-type="redaction">
+                <input type="hidden" name="exerciseId" value="<%= exercise.id %>">
+                <textarea name="response" placeholder="Écrivez votre réponse ici"></textarea>
+                <button class="btne" onclick="submitExercise(event)">Soumettre</button>
+            </form>
+        <% } %>
+        
+        
+        
+        <div id="result" class="result-box"></div>
+
+        <!-- Barre de progression avec score -->
+        <div id="progress-container">
+            <div id="progress-bar">
+                <span id="progress-text"></span>
+            </div>
+        </div>
+    </div>
+    <style>
+        .exercise-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            
+            
+        }
+
+        .titre-ligne-orange {
+            border-bottom: 2px solid #ff6600; /* Définit une bordure inférieure orange de 2 pixels */
+            padding-bottom: 5px; /* Ajoute un peu d'espace entre le titre et la ligne */
+            margin-bottom: 10px; /* Ajoute un peu d'espace en dessous de la ligne */
+        }
+        
+        .exercise-title {
+            font-size: 2em;
+        }
+        .exercise-description {
+            margin-bottom: 20px;
+        }
+        .code-editor {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background: #f9f9f9;
+        }
+        .code-editorUnwritable {
+            margin-top: 10px;
+            height: fit-content;
+            border: 1px solid #ccc;
+            padding: 5px;
+            background: #f9f9f9;
+        }
+        .result-box {
+            margin-top: 20px;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        #progress-container {
+            width: 100%;
+            background-color: #f3f3f3;
+            margin-top: 20px;
+        }
+        #progress-bar {
+            height: 20px;
+            width: 0;
+            background-color: #4caf50;
+            position: relative;
+            border: 2px solid transparent;
+        }
+        #progress-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+        }
+        /*.sidebar {
+        width: 250px;
+        background: #2c3e50;
+        color: white;
+        padding: 15px;
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        transition: transform 0.3s;
+        }
+        .sidebar-header {
+            cursor: pointer;
+            font-size: 24px;
+            text-align: right;
+        }
+        .sidebar-content {
+            margin-top: 20px;
+        }*/
+        .progress-bar-container2 {
+            width: 100%;
+            background: #34495e;
+            border-radius: 5px;
+        }
+        .progress-bar2 {
+            height: 10px;
+            background: #1abc9c;
+            border-radius: 5px;
+        }
+        .exercise-content {
+            flex: 1;
+            margin-left: 270px;
+            padding: 20px;
+        }
+        .collapsed {
+            transform: translateY(-100%); /* Déplace la sidebar vers le haut */
+            height: 0; /* Réduit la hauteur à 0 pour la faire disparaître */
+            padding: 0; /* Retire le padding */
+            width: 250px; /* Conserve la largeur pour éviter un effet bizarre */
+        }
+
+        #exerciseSidebar.collapsed .sidebar-content {
+            display: none; /* Cacher le contenu quand la sidebar est rétractée */
+        }
+
+ 
+
+        /*#sidebar.collapsed {
+            transform: translateY(-100%); /* Déplace la sidebar vers le haut 
+            height: 0; /* Réduit la hauteur à 0 pour la faire disparaître 
+            padding: 0; /* Retire le padding 
+            width: 250px; /* Conserve la largeur pour éviter un effet bizarre 
+            background-color: #ff6600;
+        }*/
+
+        .sidebar {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 250px;
+            height: auto;
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px 0 0 10px;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out, height 0.3s ease-in-out; /* Ajoutez height à la transition */
+            overflow: hidden; /* Masque le contenu quand rétracté */
+        }
+        .sidebar:hover{
+            background-color: #eceff2b4;
+        }
+
+        #toggleSidebar {
+            position: absolute;
+            left: -50px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background-color: #007bff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #toggleSidebar:hover {
+            background-color: #0056b3;
+        }
+
+        
+        .exercise-container {
+            padding-top: 60px; /* Marge pour éviter que le contenu ne soit caché par la sidebar */
+            position: relative; /* Permet de positionner #toggleSidebar par rapport à ce conteneur */
+        }
+
+        .sidebar-header {
+            display: flex; /* Utiliser flexbox */
+            align-items: center; /* Aligner verticalement */
+        }
+
+        .sidebar-header span {
+            margin-right: 20px; /* Espace entre les barres et le texte */
+        }
+
+        /*.sidebar-content{
+            border-top: 2px solid grey;
+        }*/
+        .sidebar-content2{
+            padding: 1px;
+            overflow: hidden; /* Masque le contenu quand rétracté */
+            display: none;
+        }
+
+        .sidebar-content h3 {
+            color:#ff6600;
+        }
+    </style>
+
+    <script>
+        // Fonction pour supprimer un exercice
+        function deleteExercise(exerciseId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cet exercice ?')) {
+                fetch(`/exercise/delete/${exerciseId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Exercice supprimé avec succès');
+                        // Rediriger ou mettre à jour l'interface après suppression
+                        window.location.reload(); // Optionnel, pour rafraîchir la page
+                    } else {
+                        alert('Erreur lors de la suppression de l\'exercice');
+                    }
+                })
+                .catch(err => console.error('Erreur:', err));
+            }
+        }
+
+        
+        function toggleSidebar() {
+            document.getElementById('exerciseSidebar').classList.toggle('collapsed');
+        }
+
+        /*const toggleSidebar = document.getElementById('exerciseSidebar');
+        let isDragging = false;
+        let offsetX, offsetY;
+
+        toggleSidebar.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            offsetX = e.clientX - toggleSidebar.offsetLeft;
+            offsetY = e.clientY - toggleSidebar.offsetTop;
+            document.addEventListener('mousemove', moveToggleSidebar);
+            document.addEventListener('mouseup', stopDragging);
+        });
+
+        toggleSidebar.addEventListener('click', (e) => {
+            document.getElementById('exerciseSidebar').classList.toggle('collapsed');
+        });
+
+        function moveToggleSidebar(e) {
+            if (isDragging) {
+                const newX = e.clientX - offsetX;
+                const newY = e.clientY - offsetY;
+                toggleSidebar.style.left = newX + 'px';
+                toggleSidebar.style.top = newY + 'px';
+                e.stopPropagation(); // Empêche la propagation de l'événement
+            }
+        }
+
+        function stopDragging() {
+            isDragging = false;
+            document.removeEventListener('mousemove', moveToggleSidebar);
+            document.removeEventListener('mouseup', stopDragging);
+        }*/
+
+
+
+        function adjustEditorHeight(editor) {
+            const lineCount = editor.lineCount(); // Nombre total de lignes
+            const lineHeight = 24; // Hauteur approximative d'une ligne en pixels (peut varier selon le thème)
+            const minHeight = 50; // Hauteur minimale en pixels
+            const maxHeight = 500; // Hauteur maximale pour éviter que ça devienne trop grand
+
+            let newHeight = Math.min(Math.max(lineCount * lineHeight, minHeight), maxHeight);
+            
+            editor.getWrapperElement().style.height = newHeight + "px";
+        }
+
+        // Initialisation de CodeMirror
+        const editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+            mode: "python", // Mode Python pour la coloration syntaxique
+            theme: "idea", // Thème de l'éditeur
+            lineNumbers: true, // Afficher les numéros de ligne
+            lineWrapping: true, // Retour automatique à la ligne
+            matchBrackets: true, // Surbrillance des parenthèses
+            autoCloseBrackets: true, // Fermeture automatique des parenthèses
+            indentUnit: 4, // Espaces par indentation
+            tabSize: 4, // Taille de la tabulation
+            extraKeys: {
+                "Ctrl-Space": "autocomplete", // Complétion automatique
+                "Tab": function(cm) { cm.execCommand("indentMore"); }, // Indentation avec Tab
+                "Shift-Tab": function(cm) { cm.execCommand("indentLess"); }, // Réduire l'indentation avec Shift+Tab
+            }
+        });
+
+        const editor2 = CodeMirror.fromTextArea(document.getElementById("codeUnwritable"), {
+            mode: "python", // Mode Python pour la coloration syntaxique
+            theme: "neo", // Thème de l'éditeur
+            lineNumbers: true, // Afficher les numéros de ligne
+            lineWrapping: true, // Retour automatique à la ligne
+            matchBrackets: true, // Surbrillance des parenthèses
+            autoCloseBrackets: true, // Fermeture automatique des parenthèses
+            indentUnit: 4, // Espaces par indentation
+            tabSize: 4, // Taille de la tabulation
+            extraKeys: {
+                "Ctrl-Space": "autocomplete", // Complétion automatique
+                "Tab": function(cm) { cm.execCommand("indentMore"); }, // Indentation avec Tab
+                "Shift-Tab": function(cm) { cm.execCommand("indentLess"); }, // Réduire l'indentation avec Shift+Tab
+            },
+            readOnly: true // Rend l'éditeur non modifiable
+        });
+        // Ajuster la hauteur après le rendu
+        setTimeout(() => adjustEditorHeight(editor2), 100);
+
+        function submitExercise(event) {
+            if (event) event.preventDefault();
+            const exerciseType = "<%= exercise.type %>";
+            const exerciseId = "<%= exercise.id %>";
+            let payload = { exerciseId, type: exerciseType };
+
+            if (exerciseType === "programmation") {
+                payload.code = editor.getValue();
+                console.log(editor.getValue());
+            } else if (exerciseType === "qcm") {
+                const answers = {};
+                document.querySelectorAll('input[type="radio"]:checked').forEach((input) => {
+                    answers[input.name] = input.value;
+                });
+                payload.answers = answers;
+            } else if (exerciseType === "redaction") {
+                payload.response = document.querySelector('textarea[name="response"]').value;
+            }
+
+            fetch('/submissions/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultBox = document.getElementById('result');
+                const progressBar = document.getElementById('progress-bar');  // Sélectionner la barre de progression
+                const progressText = document.getElementById('progress-text');  // Sélectionner le texte à l'intérieur de la barre
+                progressBar.style.border = "2px solid black";  // Ajouter la bordure noire
+
+                if (data.success) {
+                    resultBox.innerHTML = `<p class='success'> Félicitations <%= username %> ! Note: ${data.score} %, votre réponse a passé tous les tests</p>`;
+                    const progress = data.score;  // score entre 0 et 100
+                    progressBar.style.width = `${progress}%`;  // Modifier la largeur de la barre
+                    progressText.innerHTML = `${progress}%`;  // Afficher le score dans la barre
+                    progressBar.style.backgroundColor = progress === 100 ? "#4caf50" : "#ff9800"; // Changer la couleur si 100%
+                } else {
+                    resultBox.innerHTML = `<p class='error'>Echoué, note: ${data.score} %</p>`;
+                    const progress = data.score;  // score entre 0 et 100
+                    progressBar.style.width = `${progress}%`;  // Modifier la largeur de la barre
+                    progressText.innerHTML = `${progress}%`;  // Afficher le score dans la barre
+                    progressBar.style.backgroundColor = progress !== 100 ? "#f44336" : "#4caf50"; // Couleur rouge si échec
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+
+        // Fonction de soumission du code
+        function submitCode() {
+            const code = editor.getValue(); // Récupère le code depuis CodeMirror
+            const exerciseId = "<%= exercise.id %>";
+
+            fetch('/submissions/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code, exerciseId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultBox = document.getElementById('result');
+                const progressBar = document.getElementById('progress-bar');  // Sélectionner la barre de progression
+                const progressText = document.getElementById('progress-text');  // Sélectionner le texte à l'intérieur de la barre
+                progressBar.style.border = "2px solid black";  // Ajouter la bordure noire
+
+                if (data.success) {
+                    resultBox.innerHTML = `<p class='success'> Félicitations <%= username %> ! Note: ${data.score} %, votre code a passé tous les tests</p>`;
+                    const progress = data.score;  // score entre 0 et 100
+                    progressBar.style.width = `${progress}%`;  // Modifier la largeur de la barre
+                    progressText.innerHTML = `${progress}%`;  // Afficher le score dans la barre
+                    progressBar.style.backgroundColor = progress === 100 ? "#4caf50" : "#ff9800"; // Changer la couleur si 100%
+                } else {
+                    resultBox.innerHTML = `<p class='error'>Echoué, note: ${data.score} %</p>`;
+                    const progress = data.score;  // score entre 0 et 100
+                    progressBar.style.width = `${progress}%`;  // Modifier la largeur de la barre
+                    progressText.innerHTML = `${progress}%`;  // Afficher le score dans la barre
+                    progressBar.style.backgroundColor = progress !== 100 ? "#f44336" : "#4caf50"; // Couleur rouge si échec
+                }
+            })
+            .catch(err => console.error(err));
+        }
+    </script>
+  
+</body>
+</html>

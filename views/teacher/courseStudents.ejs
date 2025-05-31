@@ -1,0 +1,41 @@
+
+
+<div class="max-w-6xl mx-auto p-6">
+  <h2 class="text-2xl font-bold mb-6 text-gray-800">
+    Étudiants inscrits à : "<%= course.name %>"
+  </h2>
+
+  <% if (students.length === 0) { %>
+    <p class="text-gray-600 italic">Aucun étudiant inscrit pour le moment.</p>
+  <% } else { %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <% students.forEach(student => { %>
+        <div class="bg-white shadow-md rounded-xl overflow-hidden p-4 flex items-center gap-4 hover:shadow-lg transition">
+          <img 
+            src="<%= student.profile || '/images/default-avatar.png' %>" 
+            alt="Photo de <%= student.name + ' ' + student.firstname || student.username %>" 
+            class="picture"
+          >
+          <div>
+            <h4 class="text-lg font-semibold text-gray-800">
+              <%= (student.name ? student.name : '') + ' ' + (student.firstname ? student.firstname : '') || student.username %>
+            </h4>
+            <p class="text-sm text-gray-600"><%= student.contact %></p>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<style>
+
+.picture{
+
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+
+}
+
+</style>

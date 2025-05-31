@@ -1,0 +1,63 @@
+
+<div class="p-6">
+  <h1 class="text-3xl font-bold mb-6">Tableau de bord professeur</h1>
+
+  <!-- Section Revenus -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white p-6 rounded-2xl shadow-md">
+      <h2 class="text-xl font-semibold mb-2">Mes Revenus</h2>
+      <canvas id="revenueChart" class="w-full h-64"></canvas>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow-md flex flex-col justify-between">
+      <div>
+        <h3 class="text-lg font-medium">Dernier retrait</h3>
+        <p class="text-gray-600 text-2xl mt-2 mb-4">$<%= lastWithdrawalAmount %> - <%= lastWithdrawalDate %></p>
+      </div>
+      <button class="bg-blue-600 text-white py-2 px-4 rounded-xl hover:bg-blue-700">Effectuer un retrait</button>
+    </div>
+  </div>
+
+  <!-- Section Cours -->
+  <div class="bg-white p-6 rounded-2xl shadow-md mb-8">
+    <h2 class="text-xl font-semibold mb-4">Mes Cours</h2> </br></br>
+    <a href="/courses/add" class="text-sm text-yellow-600 hover:underline">Ajouter un cours</a>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <% courses.forEach(course => { %>
+        <div class="border rounded-xl p-4 shadow hover:shadow-lg transition">
+          <h3 class="text-lg font-bold"><%= course.name %></h3>
+          <p class="text-sm text-gray-600">Inscriptions :  <%= course.students?.length || 0 %></p>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <a href="/teacher/courses/<%= course.id %>/students" class="text-sm text-blue-600 hover:underline">Voir les élèves</a>
+            <a href="/teacher/courses/<%= course.id %>/forum" class="text-sm text-purple-600 hover:underline">Gérer le forum</a>
+            <a href="/teacher/courses/<%= course.id %>/submissions" class="text-sm text-green-600 hover:underline">Voir les soumissions</a>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('revenueChart');
+  const revenueChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: <%- JSON.stringify(revenueLabels) %>,
+      datasets: [{
+        label: 'Revenus ($)',
+        data: <%- JSON.stringify(revenueData) %>,
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+</script>

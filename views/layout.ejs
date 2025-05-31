@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academy</title>
+    <link rel="icon" type="image/x-icon" href="/pictures/AcademyLogoTransparent-removebg-preview.png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet"  type="text/css" href="/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <img src="/pictures/AcademyLogoTransparent.png" alt="Logo" class="logo-img">
+            Academy
+        </div>
+        <ul class="nav-links">
+            <li><a href="/dash">Tableau de bord</a></li>
+            <li><a href="/courses/myCourses">Mes cours</a></li>
+            <li><a href="/credits">Crédits : <%= user ? user.credits : 0  %> </a></li>
+            <li><a href="/dash/profile">Profil</a></li>
+            <li><a href="/auth/logout"><%= user ? "Déconnexion" : "Connexion" %> </a></li>
+        </ul>
+    </nav>
+    <div class="content">
+        <%- body %>
+    </div>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<div class="forum-container">
+  <div class="messages">
+    <% forumPosts.forEach(post => { %>
+      <div class="message-card">
+        <div class="message-header">
+          <p class="author"><%= post.author %></p>
+          <div class="meta">
+            <span class="timestamp"><%= new Date(post.createdAt).toLocaleString() %></span>
+
+            <!-- Bouton Répondre -->
+            <button type="button"
+              class="text-blue-600 text-xs hover:underline"
+              data-id="<%= post.id %>"
+              onclick="toggleReplyForm('<%= post.id %>')">
+              Répondre
+            </button>
+
+            <!-- Bouton Supprimer -->
+            <% if (post.author === user.username) { %>
+              <form action="/courses/courses/<%= course.id %>/forum/<%= post.id %>/delete" method="POST" onsubmit="return confirm('Supprimer ce message ?');">
+                <button type="submit" class="text-red-600 text-xs hover:underline">Supprimer</button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+
+        <p class="message-content"><%= post.message %></p>
+
+        <!-- Réponses -->
+        <div class="replies">
+          <% post.replies.forEach(reply => { %>
+            <div class="reply-card">
+              <div class="reply-header">
+                <span class="reply-author"><%= reply.author %></span>
+                <span class="reply-timestamp"><%= new Date(reply.createdAt).toLocaleString() %></span>
+                <% if (reply.author === user.username) { %>
+                  <form action="/courses/courses/<%= course.id %>/forum/<%= reply.id %>/delete" method="POST" onsubmit="return confirm('Supprimer ce message ?');">
+                    <button type="submit" class="text-red-600 text-xs hover:underline">Supprimer</button>
+                  </form>
+                <% } %>
+              </div>
+              <p class="reply-content"><%= reply.message %></p>
+            </div>
+          <% }) %>
+        </div>
+
+        <!-- Formulaire de réponse masqué par défaut -->
+        <form action="/courses/forum/<%= course.id %>/forum/<%= post.id %>/reply"
+              method="POST"
+              class="reply-form hidden mt-2"
+              id="reply-form-<%= post.id %>">
+          <textarea name="message" rows="2" placeholder="Répondre..." required></textarea>
+          <button type="submit">Répondre</button>
+        </form>
+      </div>
+    <% }) %>
+  </div>
+
+  <!-- Nouveau message -->
+  <form action="/courses/forum/<%= course.id %>/forum/new" method="POST" class="new-post-form">
+    <textarea name="message" rows="2" placeholder="Écrire un message..." required></textarea>
+    <button type="submit">Envoyer</button>
+  </form>
+</div>
+
+<style>
+/* Container global */
+.forum-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f9fafb;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Zone scrollable des messages */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+/* Carte message */
+.message-card {
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* En-tête message */
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+.author {
+  font-weight: 600;
+  color: #374151;
+}
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.timestamp, .reply-timestamp {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+.text-red-600 {
+  color: #ef4444;
+  font-size: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.text-blue-600 {
+  color: #449aef;
+  font-size: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Message principal */
+.message-content {
+  color: #111827;
+  margin-bottom: 0.75rem;
+}
+
+/* Réponses */
+.replies {
+  padding-left: 1rem;
+  border-left: 3px solid #e5e7eb;
+  margin-top: 0.5rem;
+}
+.reply-card {
+  background: #f3f4f6;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+.reply-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #4b5563;
+}
+.reply-content {
+  margin-top: 0.25rem;
+  color: #1f2937;
+}
+
+/* Formulaires */
+.reply-form, .new-post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+}
+.reply-form textarea, .new-post-form textarea {
+  resize: none;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+}
+.reply-form button, .new-post-form button {
+  align-self: flex-end;
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.reply-form button:hover, .new-post-form button:hover {
+  background-color: #2563eb;
+}
+
+/* Caché par défaut */
+.hidden {
+  display: none;
+}
+</style>
+
+<script>
+  function toggleReplyForm(postId) {
+    const form = document.getElementById(`reply-form-${postId}`);
+    if (form) {
+      form.classList.toggle('hidden');
+      if (!form.classList.contains('hidden')) {
+        form.querySelector('textarea').focus();
+      }
+    }
+  }
+</script>

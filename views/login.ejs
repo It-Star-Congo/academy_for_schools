@@ -1,0 +1,65 @@
+<div class="form-login" id="form-login">
+    <form action="/auth/login" method="POST">
+        <h3>Se connecter</h3>
+        <label for="username">Nom d'utilisateur :</label>
+        <input type="text" name="username" placeholder="Nom d'utilisateur" required />
+        <label for="password">Mot de passe :</label>
+        <input type="password" name="password" placeholder="Mot de passe" required />
+        <button type="submit">Login</button>
+    </form>
+    
+</div>
+
+<div class="registerdiv" id="registerdiv">
+    <p>Vous n'avez pas de compte ?   <a href="/auth/register" class="btn"> S'enregistrer</a></p>
+</div>
+
+<style>
+    .form-login {
+        width: 400px;
+        margin: 50px auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-login h3 {
+        text-align: center;
+        margin-bottom: 20px;
+        color : #ff6600;
+    }
+
+    .form-login label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    .form-login input[type="text"],
+    .form-login input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        box-sizing: border-box;
+    }
+
+    .form-login button[type="submit"] {
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+
+    .form-login button[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+
+
+</style>
+  

@@ -1,0 +1,89 @@
+
+<div class="course-container">
+    <h1 class="course-title">Mes Cours</h1>
+    <p class="course-description">Voici vos cours.</p>
+    
+    <ul class="exercise-list">
+        <% if (exercises.length > 0) { %>
+            <% exercises.forEach(exercise => { %>
+                <li class="exercise-item">
+                    <a href="/exercise/course/<%= exercise.name %>" class="exercise-link">
+                        <div class="exercise-icon">
+                            <img src="/pictures/AcademyLogoTransparent.png" alt="Icône exercice">
+                        </div>
+                        <h2><%= exercise.name %></h2>
+                        <p><%= exercise.description %></p>
+                    </a>
+                </li>
+            <% }); %>
+        <% } else { %>
+            <p class="no-exercises">Aucun exercice disponible pour ce cours.</p>
+        <% } %>
+    </ul>
+</div>
+
+
+
+<style>
+.course-container {
+    flex: 1; /* Permet aux blocs de prendre un espace égal */
+    max-width: 48%; /* Empêche qu'ils soient trop larges */
+    margin: auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+
+.course-title {
+    color: #ff6600;
+    text-align: center;
+}
+
+.course-description {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.exercise-icon img {
+    width: 60px; /* Ajuste la taille de l’icône */
+    height: 60px;
+    margin-bottom: 10px;
+}
+
+.exercise-list {
+    list-style: none;
+    padding: 0;
+}
+
+.exercise-item {
+    background: #f9f9f9;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.exercise-item:hover {
+    background: #ff6600;
+    color: white;
+}
+
+.exercise-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.no-exercises {
+    text-align: center;
+    font-style: italic;
+    color: #777;
+}
+
+
+</style>
+

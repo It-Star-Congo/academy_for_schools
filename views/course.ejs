@@ -1,0 +1,224 @@
+
+
+    </br> <div class="exercise-link2">  <a href="/courses/forum/<%= courseId %>/forum" >  Voir le forum de ce cours </a></div> </br> </br>
+<div class="course-container3">
+    <div class="course-container2">
+        <h1 class="course-title">Cours : <%= courseName %> Contenu principal </h1>
+        <p class="course-description">Voici les Ressources disponibles pour ce cours.</p>
+
+        
+        <div class="swiper mySwiper"> </br> </br>
+            <div class="swiper-wrapper">
+                <% if (course.documents && course.documents.length > 0) { %>
+                <% course.documents.forEach(doc => { %>
+                    <div class="swiper-slide">
+                        <a href="<%= doc.path %>" download>
+                        <img src="/pictures/AcademyLogoTransparent.png" alt="Télécharger" style="width: 32px; height: 32px;">
+                        <p class = "nonbleu"><%= doc.originalName %></p>
+                        </a>
+                    </div>
+                    
+                <% }) %>
+                <% } else { %>
+                <p>Aucun document disponible.</p>
+                <% } %>
+
+            </div>
+    
+            <!-- Pagination et boutons de navigation -->
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+        </div>
+    </div>
+    <div class="course-container">
+        <h1 class="course-title">Cours : <%= courseName %> Exercices</h1>
+        <p class="course-description">Voici les exercices disponibles pour ce cours.</p>
+        
+        <ul class="exercise-list">
+            <% if (exercises.length > 0) { %>
+                <% exercises.forEach(exercise => { %>
+                    <li class="exercise-item">
+                        <a href="/exercise/exe/<%= exercise.id %>" class="exercise-link">
+                            <h2><%= exercise.title %></h2>
+                            <p><%= exercise.description %></p>
+                        </a>
+                    </li>
+                <% }); %>
+            <% } else { %>
+                <p class="no-exercises">Aucun exercice disponible pour ce cours.</p>
+            <% } %>
+        </ul>
+    </div>
+</div>
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css">
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
+
+
+<style>
+
+a {
+    text-decoration: none;
+}
+.course-container {
+    flex: 1; /* Permet aux blocs de prendre un espace égal */
+    max-width: 48%; /* Empêche qu'ils soient trop larges */
+    margin: auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.nonbleu{
+    text-decoration: none;
+    color: #555;
+}
+
+.swiper-slide{
+    border: 1px black solid;
+}
+
+.swiper-wrapper{
+    height: 150px;
+}
+
+.course-container3 {
+    display: flex; /* Active le mode Flexbox */
+    justify-content: space-between; /* Espacement équilibré entre les blocs */
+    gap: 20px; /* Ajoute un espace entre les blocs *//* Utiliser flexbox */
+    height: fit-content;
+}
+
+
+.course-container2 {
+    flex: 1; /* Permet aux blocs de prendre un espace égal */
+    max-width: 48%; /* Empêche qu'ils soient trop larges */
+    margin: auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+}
+
+.course-title {
+    color: #ff6600;
+    text-align: center;
+}
+
+.course-description {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.exercise-list {
+    list-style: none;
+    padding: 0;
+}
+.exercise-link2 {
+    border: 1px black solid;
+    background-color: #ff6600;
+    
+    width: fit-content;
+    height:auto; 
+}
+
+.exercise-link2 a {
+    text-decoration: none;
+    color: #f9f9f9;
+}
+
+.exercise-item {
+    background: #f9f9f9;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.exercise-item:hover {
+    background: #ff6600;
+    color: white;
+}
+
+.exercise-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.no-exercises {
+    text-align: center;
+    font-style: italic;
+    color: #777;
+}
+
+.swiper {
+    width: 100%;
+    height: 350px; /* Ajuste selon tes besoins */
+}
+
+.swiper-slide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+}
+
+.swiper-slide:hover {
+    transform: scale(1.05);
+}
+
+.exercise-icon img {
+    width: 60px; /* Ajuste la taille de l’icône */
+    height: 60px;
+    margin-bottom: 10px;
+}
+
+.exercise-link {
+    text-decoration: none;
+    color: #333;
+}
+
+.swiper-button-prev, .swiper-button-next {
+    color: #ff6600; /* Couleur des flèches de navigation */
+    /*background-color: #ecebebbd;*/
+    border: 1px gray unset;
+}
+</style>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var swiper = new Swiper(".mySwiper", {
+            slidesPerView: 3, // Nombre d'exercices visibles
+            spaceBetween: 20, // Espace entre les exercices
+            loop: true,
+            navigation: {
+                nextEl: ".swiper-button-next",
+                prevEl: ".swiper-button-prev",
+            },
+            pagination: {
+                el: ".swiper-pagination",
+                clickable: true,
+            },
+            breakpoints: {
+                768: {
+                    slidesPerView: 2, // Sur tablette
+                },
+                480: {
+                    slidesPerView: 1, // Sur mobile
+                }
+            }
+        });
+    });
+    </script>
