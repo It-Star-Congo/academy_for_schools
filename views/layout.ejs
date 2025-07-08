@@ -17,13 +17,15 @@
         <ul class="nav-links">
             <li><a href="/dash">Tableau de bord</a></li>
             <li><a href="/courses/myCourses">Mes cours</a></li>
-            <li><a href="/credits">Crédits : <%= user ? user.credits : 0  %> </a></li>
-            <li><a href="/dash/profile">Profil</a></li>
+            <li><a href="/dash/profile3"><%= user ? user.username : "profil" %> </a></li>
             <li><a href="/auth/logout"><%= user ? "Déconnexion" : "Connexion" %> </a></li>
+            <li class="apartes"><a href="/teacher">Teacher Side</a></div></li>
         </ul>
     </nav>
     <div class="content">
         <%- body %>
     </div>
 </body>
+
+
 </html>

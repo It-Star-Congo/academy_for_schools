@@ -27,10 +27,10 @@
             <div class="sidebar-content">
                 <h3 class="titre-ligne-orange"><%= exercise.title %></h3>
                 <p><strong>Auteur :</strong> <%= exercise.author %></p>
-                <p><strong>Date limite :</strong> <%= exercise.deadline %></p>
+                <p><strong>Date limite :</strong> <%= exercise.deadline ? exercise.deadline : 'Aucune' %></p>
                 <p><strong>Poids de la note :</strong> <%= exercise.weight ? exercise.weight : 1 %></p>
-                <p><strong>Nombre d'essais :</strong> <%= exercise.attempts %></p>
-                <p><strong>Meilleure note :</strong> <%= exercise.bestScore %>/100</p>
+                <p><strong>Nombre d'essais :</strong> <%= attempts ? attempts : 0 %></p>
+                <p><strong>Meilleure note :</strong> <%= bestScore ? bestScore : 0 %>/100</p>
                 
                 <div class="progress-bar-container2">
                     <div class="progress-bar2" style="width: <%= exercise.bestScore %>%"></div>
@@ -46,7 +46,7 @@
         <h1 class="exercise-title"><%= exercise.title %></h1>
         <p class="exercise-description"><%= exercise.description %></p>
         <% if (exercise.type === 'programmation') { %>
-            <form id="programmationForm" data-type="programmationForm"></form>
+            <form id="programmationForm" data-type="programmationForm">
             <div class="code-editorUnwritable">
                 <textarea id="codeUnwritable" name="codeUnwritable" placeholder="Écris ton code ici..."><%= exercise.starterCode %></textarea>
             </div>
@@ -415,6 +415,7 @@
 
             fetch('/submissions/submit', {
                 method: 'POST',
+                credentials: 'same-origin', 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })

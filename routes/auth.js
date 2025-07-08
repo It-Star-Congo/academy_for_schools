@@ -2,9 +2,16 @@ const express = require('express');
 const passport = require('passport');
 const multer = require('multer');
 const path = require('path');
+const bcrypt = require('bcrypt');
+const { body, validationResult } = require('express-validator');
 const { User } = require('../models');  // Assurez-vous d'importer User comme objet destructuré
 const { Sequelize } = require('sequelize');  // Ajoute cette ligne en haut de ton fichier
+const logger = require('../config/logger');
+const limiter = require('../middlewares/rateLimiter'); // 5 req/min
 const router = express.Router();
+//const csrf = require('csurf');
+
+
 
 
 // Configuration de Multer pour le stockage des images et fichiers
@@ -24,6 +31,11 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 
+/*const csrfProtection = csrf();   // middleware route-level
+const addCsrf = (req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  return next();
+};*/
 
 
 // Page de connexion
@@ -53,8 +65,7 @@ router.get('/abonnement', (req, res) => {
 router.post('/submit-abonnement', async (req, res) => {
     try {
         const abonnementChoisi = req.body.abonnement;
-        const username = req.session.user.username;
-        console.log(req.session.user)
+        const username = req.session.username;
 
         console.log(abonnementChoisi)
         // Vérifier si l'utilisateur existe
@@ -80,7 +91,12 @@ router.post('/submit-abonnement', async (req, res) => {
 
 
 // Traitement de la connexion
-router.post('/login', async (req, res) => {
+router.post('/login',limiter, 
+  [
+    body('username').notEmpty().withMessage('Username requis'),
+    body('password').notEmpty().withMessage('Mot de passe requis')
+  ],
+   async (req, res, next) => {
     try {
       // Récupération des données du formulaire
       const { username, password } = req.body;
@@ -94,19 +110,73 @@ router.post('/login', async (req, res) => {
       }
       
       // Comparer le mot de passe envoyé avec celui dans la base de données (en texte clair)
-      if (user.password !== password) {
+      let ok = await bcrypt.compare(password + process.env.PEPPER, user.password);
+      if (!ok) {
         return res.status(400).json({ error: 'Mot de passe incorrect' });
       }
       
       // Si le mot de passe est correct, on crée une session pour l'utilisateur
-      req.session.user = { id: user.id, username: user.username, profile: '/pictures/AcademyLogoTransparent-removebg-preview.png', email: user.contact, subscriptionType : "Free", credits: user.credits, role: user.role };
+      req.session.user = { id: user.id, username: user.username, profile: user.profile || '/pictures/AcademyLogoTransparent-removebg-preview.png', email: user.contact, subscriptionType : "Free", credits: user.credits, role: user.role };
       
       // Redirection vers le dashboard ou autre page
+      // après un login réussi
+      
+
+      if (req.session.user.role === 'teacher'){
+        logger.log({
+        level:   'info',
+        message: `Connexion réussie pour teacher #${user.id}: ${user.username}`,
+        meta: {
+          category: 'auth',
+          ip:       req.ip,
+          method:   req.method,
+          url:      req.originalUrl
+        }
+      });
+        res.redirect('/teacher/dash')
+      }else{
+        logger.log({
+        level:   'info',
+        message: `Connexion réussie pour user #${user.id}: ${user.username}`,
+        meta: {
+          category: 'auth',
+          ip:       req.ip,
+          method:   req.method,
+          url:      req.originalUrl
+        }
+      });
       res.redirect('/dash');
+      }
     } catch (error) {
+     logger.warn('Login échoué', { username: req.body.username, ip: req.ip });
       console.error('Erreur lors du login:', error);
       res.status(500).json({ error: 'Erreur lors de la tentative de connexion' });
     }
+
+    /*  const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        console.log(errors.array().map(e => e.msg))
+      req.flash('messages', errors.array().map(e => e.msg));
+      return res.redirect('/auth/login');
+    }
+
+    passport.authenticate('local', (err, user, info) => {
+      if (err) {
+        logger.error(err.message);
+        return next(err);
+      }
+      if (!user) {
+        req.flash('messages', [info?.message || 'Échec de connexion']);
+        logger.warn('Login échoué', { username: req.body.username, ip: req.ip });
+        return res.redirect('/auth/login');
+      }
+      req.logIn(user, err => {
+        if (err) return next(err);
+        logger.info('Login réussi', { id: user.id, username: user.username, ip: req.ip });
+        res.redirect('/dash');
+      });
+    })(req, res, next);*/
+
   });
   
 
@@ -114,7 +184,14 @@ router.post('/login', async (req, res) => {
 router.post('/register', upload.fields([
     { name: 'image', maxCount: 1 }, 
     { name: 'documents', maxCount: 10 } // Autorise jusqu'à 10 fichiers
-]), async (req, res) => {
+]), limiter ,[
+    body('username').trim().isLength({ min: 3 }).withMessage('Username trop court'),
+    body('contact').isEmail().withMessage('Contact invalide'),
+    /*body('password')
+      .isStrongPassword()
+      .withMessage('Mot de passe trop faible'),*/
+    body('birthdate').isDate().withMessage('Date de naissance invalide')
+  ], async (req, res) => {
 
 
     // Vérifier si un utilisateur avec le même username ou contact existe déjà
@@ -135,7 +212,7 @@ router.post('/register', upload.fields([
         }
 
         // Sécuriser le mot de passe avec bcrypt
-        const hashedPassword = password;
+        const hashedPassword = await bcrypt.hash(password + process.env.PEPPER, 12); 
         
         // await bcrypt.hash(password, 10);
 
@@ -156,10 +233,26 @@ router.post('/register', upload.fields([
             abonnement : "academic"
         });
 
+        logger.log({
+        level:   'info',
+        message: `Enregistrement réussie pour user #${user.id}: ${user.username}`,
+        meta: {
+          category: 'auth',
+          ip:       req.ip,
+          method:   req.method,
+          url:      req.originalUrl
+        }
+      });
+
         req.flash('messages', ['Inscription réussie ! Vous pouvez vous connecter maintenant.']);
         req.session.user = { id: user.id, username: user.username, profile: imagePath, email: user.contact, credits: user.credits, abonnement : "Basic", role: user.role };
         console.log("ok1")
-        res.redirect('/auth/abonnement');  // Rediriger vers la page de choix d'abonnement
+
+        /*req.login(user, err =>
+        err ? next(err) : res.redirect('/dash')
+      );*/
+      res.redirect('/dash')
+        //res.redirect('/auth/abonnement');  // Rediriger vers la page de choix d'abonnement
 
     } catch (err) {
         console.error(err);
@@ -169,11 +262,8 @@ router.post('/register', upload.fields([
 });
 
 // Déconnexion
-router.get('/logout', (req, res) => {
-    req.logout((err) => {
-        if (err) { return next(err); }
-        res.redirect('/');
-    });
-});
+router.get('/logout', (req, res, next) =>
+  req.session = null
+);
 
 module.exports = router;

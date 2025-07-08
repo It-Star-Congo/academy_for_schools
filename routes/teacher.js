@@ -2,11 +2,14 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const fs = require('fs');
+const bcrypt = require('bcrypt');
+const { Op } = require('sequelize');
+
 //const bcrypt = require('bcrypt');
 
 
 const multer = require('multer');
-const { User, Course } = require('../models'); // Assure-toi d'importer tes modèles correctement
+const { User, Course, Submission, Exercise } = require('../models'); // Assure-toi d'importer tes modèles correctement
 
 const createFolderIfNotExists = (folderPath) => {
   if (!fs.existsSync(folderPath)) {
@@ -40,11 +43,30 @@ const upload = multer({ storage });
 
   
 
+router.get('/', async (req, res) => {
 
+  try{
+    console.log(req.session.user);
+
+    if(req.session.user.role ===  'teacher'){
+      res.redirect('/teacher/dash')
+    }else{
+      res.redirect('/login')
+    }
+
+  }catch{
+    res.status(500).json({ error: 'Erreur lors de la récupération des données professeur: ' + error });
+  }
+
+
+});
 
 // GET - Tableau de bord professeur
 router.get('/dash', async (req, res) => {
   try {
+
+    console.log(req.session.user)
+    if (!req.session.user){res.render('loginTeacher');}
 
     const username = req.session.user.username;
 
@@ -110,10 +132,11 @@ router.post('/login', async (req, res) => {
     }
 
     // Comparer le mot de passe envoyé avec celui dans la base de données (en texte clair)
-    if (user.password !== password) {
+    let ok = await bcrypt.compare(password + process.env.PEPPER, user.password);
+    if (!ok) {
       return res.status(400).json({ error: 'Mot de passe incorrect' });
     }
-
+    
     // Si le mot de passe est correct, on crée une session pour l'utilisateur
     req.session.user = { 
       id: user.id, 
@@ -122,7 +145,17 @@ router.post('/login', async (req, res) => {
       email: user.contact, 
       role: user.role, 
     };
-
+    
+    logger.log({
+      level:   'info',
+      message: `Connexion réussie pour User ${user.id}`,
+      meta: {
+        category: 'auth',
+        ip:       req.ip,
+        method:   req.method,
+        url:      req.originalUrl
+      }
+    });
     // Redirection vers le dashboard ou autre page
     res.redirect('/teacher/dash');
   } catch (error) {
@@ -156,12 +189,13 @@ router.post('/register',
 
       console.log("2");
       console.log(profilePath);
+      const hashedPassword = await bcrypt.hash(password + process.env.PEPPER, 12);
       const user = await User.create({
         name,
         firstname,
         username,
         contact: email,
-        password,
+        password: hashedPassword,
         bio,
         role: "teacher",
         profile: profilePath,
@@ -214,6 +248,142 @@ router.get('/courses/:courseId/students', async (req, res) => {
     res.status(500).send("Erreur serveur.");
   }
 });
+
+router.get('/courses/:courseId/submissions2', async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    // Récupère les infos du cours
+    const course = await Course.findByPk(courseId, { attributes: ['id', 'name'] });
+    // Récupère tous les exercices du cours
+    const exercises = await Exercise.findAll({
+      where: { CourseId: courseId },
+      attributes: ['id', 'title']
+    });
+    // Récupère toutes les soumissions de ces exercices
+    const submissions = await Submission.findAll({
+      include: [
+        {
+          model: Exercise,
+          where: { CourseId: courseId },  
+          attributes: ['id','title'],
+          required: true            // ← force l'INNER JOIN
+        },
+        {
+          model: User,
+          attributes: ['id','username','contact']
+        }
+      ],
+      order: [['createdAt','DESC']]
+    });
+
+
+    // Organise les données : pour chaque exercice, regroupe par élève
+    const data = exercises.map(ex => {
+      const subsForEx = submissions.filter(s => s.ExerciseId === ex.id);
+      const byStudent = {};
+      subsForEx.forEach(s => {
+        const uid = s.User.id;
+        if (!byStudent[uid]) byStudent[uid] = { user: s.User, subs: [] };
+        byStudent[uid].subs.push(s);
+      });
+      const studentEntries = Object.values(byStudent).map(({ user, subs }) => {
+        const count = subs.length;
+        const best = subs.reduce((a, b) => a.score >= b.score ? a : b);
+        const avg = Math.round(subs.reduce((sum, x) => sum + x.score, 0) / count);
+        const last = subs[0].createdAt;
+        console.log(count, avg)
+        console.log(studentEntries)
+        return { user, count, best, avg, last };
+      });
+      return { exercise: ex, studentEntries };
+    });
+
+    res.render('submissions', { course, data });
+  } catch (err) {
+    console.error('Erreur affichage soumissions :', err);
+    res.status(500).send('Erreur interne');
+  }
+});
+
+
+
+ 
+router.get('/courses/:courseId/submissions', async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    // Récupère le cours
+    const course = await Course.findByPk(courseId, {
+      attributes: ['id', 'name']
+    });
+    if (!course) {
+      return res.status(404).send('Cours introuvable');
+    }
+
+    const subs = await Submission.findAll({
+      include: [{ model: Exercise }]  // sans where, sans required
+    });
+    console.log('🔍 Submissions + include Exercise (no filter) :', subs.length);
+    console.log(subs[0].Exercise); 
+
+    // Récupère toutes les soumissions des exercices liés à ce cours
+    const submissions = await Submission.findAll({
+      include: [
+        {
+          model: Exercise,
+          where: { CourseId: courseId },
+          attributes: ['id', 'title'],
+          required: true      // force l’INNER JOIN pour ne renvoyer que les bonnes
+        },
+        {
+          model: User,
+          attributes: ['id', 'username', 'contact'],
+          required: true
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+    console.log(submissions);
+
+    console.log('🎯 Submissions trouvées pour le cours', courseId, ':', submissions.length);
+
+    // Regroupe par exercice puis par étudiant
+    const byExercise = {};
+    submissions.forEach(sub => {
+      const ex = sub.Exercise;
+      // initialisation du bloc exercice
+      if (!byExercise[ex.id]) {
+        byExercise[ex.id] = { exercise: ex, students: {} };
+      }
+      const bucket = byExercise[ex.id].students;
+
+      const userId = sub.User.id;
+      // initialisation du bucket étudiant
+      if (!bucket[userId]) {
+        bucket[userId] = { user: sub.User, subs: [] };
+      }
+      bucket[userId].subs.push(sub);
+    });
+
+    // Transforme en tableau pour la vue
+    const data2 = Object.values(byExercise).map(({ exercise, students }) => ({
+      exercise,
+      studentEntries: Object.values(students).map(({ user, subs }) => {
+        const count = subs.length;
+        const best  = subs.reduce((a,b) => (a.score >= b.score ? a : b));
+        const avg   = Math.round(subs.reduce((sum,x) => sum + x.score, 0) / count);
+        const last  = subs[0].createdAt;
+        return { user, count, best, avg, last };
+      })
+    }));
+
+    res.render('submissions', { course, data2 });
+  } catch (err) {
+    console.error('Erreur affichage soumissions :', err);
+    res.status(500).send('Erreur interne');
+  }
+});
+
 
   
 

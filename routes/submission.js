@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { Exercise, Submission } = require('../models');
+const { Exercise, Submission} = require('../models');
 const fs = require('fs');
 const { spawn, exec  } = require('child_process');
 const path = require('path');
+const logger = require('../config/logger');
 
 
 // Récupérer toutes les soumissions
@@ -19,8 +20,8 @@ router.get('/', async (req, res) => {
 // Ajouter une soumission
 router.post('/', async (req, res) => {
   try {
-    const { code, result, score } = req.body;
-    const newSubmission = await Submission.create({ code, result, score });
+    const { exercice, data, code, result, score } = req.body;
+    const newSubmission = await Submission.create({ exercice, data, code, result, score });
     res.status(201).json(newSubmission);
   } catch (error) {
     res.status(500).json({ error: 'Erreur lors de la création de la soumission' });
@@ -57,9 +58,12 @@ router.post('/submite', async (req, res) => {
 
             try {
                 sanitizedCode = sanitizeCodee(code);
+                
             } catch (err) {
                 return res.status(400).json({ error: err.message });
             }
+
+            const data = sanitizedCode;
 
             const fileExtension = { python: 'py', c: 'c', cpp: 'cpp', java: 'java' }[language];
             const fileName = `student_code.${fileExtension}`;
@@ -106,6 +110,7 @@ router.post('/submite', async (req, res) => {
             fs.unlinkSync(filePath);
             score = success ? 100 : (results.filter(r => r.success).length / testCases.length) * 100;
         } else if (type === "qcm") {
+            const data = [];
             console.log("ok on a trer")
             let correctAnswers = 0;
             let totalQuestions = exercise.questions.length;
@@ -113,6 +118,17 @@ router.post('/submite', async (req, res) => {
                 if (answers[`answer-${index}`] == question.correctAnswer) {
                     correctAnswers++;
                 }
+                // On pousse un objet dans data contenant :
+                // - l'énoncé de la question (ici question.text ou comme tu l'as défini)
+                // - la réponse donnée par l'utilisateur
+                // - la bonne réponse (optionnel)
+                // - un flag isCorrect (optionnel)
+                data.push({
+                    question:      question.text,         // ou question.enonce selon ta structure
+                    userAnswer:    answers[`answer-${index}`],
+                    correctAnswer: question.correctAnswer,
+                    isCorrect:     isCorrect
+                });
                 console.log(answers[`answer-${index}`]);
                 console.log(question.correctAnswer);
             });
@@ -125,7 +141,7 @@ router.post('/submite', async (req, res) => {
         }
 
         await Submission.create({
-            code: sanitize || null,
+            code: data || null,
             result: JSON.stringify(results),
             score,
             UserId: req.session.user.id,
@@ -148,6 +164,7 @@ router.post('/submit', async (req, res) => {
     try {
         const { code, exerciseId, type, answers, response } = req.body;
         const exercise = await Exercise.findByPk(exerciseId);
+        
 
         if (!exercise) {
             return res.status(404).json({ error: 'Exercice non trouvé' });
@@ -158,6 +175,7 @@ router.post('/submit', async (req, res) => {
         let score = 0;
         let results = [];
         let sanitize = null;
+        let data = [];
 
         if (type === "programmation") {
 
@@ -184,6 +202,7 @@ router.post('/submit', async (req, res) => {
             } catch (err) {
                 return res.status(400).json({ error: err.message });
             }
+            sanitizedCode;
 
             const filePath = path.join(__dirname, 'temp.py');
             const functionTemplate = `
@@ -231,13 +250,28 @@ if __name__ == "__main__":
 
             
         } else if (type === "qcm") {
+            
             console.log("ok on a trer")
+    
             let correctAnswers = 0;
             let totalQuestions = exercise.questions.length;
             exercise.questions.forEach((question, index) => {
+                let isCorrect = false;
                 if (answers[`answer-${index}`] == question.correctAnswer) {
                     correctAnswers++;
+                    isCorrect = true;
                 }
+                // On pousse un objet dans data contenant :
+                // - l'énoncé de la question (ici question.text ou comme tu l'as défini)
+                // - la réponse donnée par l'utilisateur
+                // - la bonne réponse (optionnel)
+                // - un flag isCorrect (optionnel)
+                data.push({
+                    question:      question.question,         // ou question.enonce selon ta structure
+                    userAnswer:    answers[`answer-${index}`],
+                    correctAnswer: question.correctAnswer,
+                    isCorrect:     isCorrect
+                });
                 console.log(answers[`answer-${index}`]);
                 console.log(question.correctAnswer);
             });
@@ -250,12 +284,24 @@ if __name__ == "__main__":
         }
 
         await Submission.create({
-            code: sanitize || null,
+            code: code || null,
+            data: data || null,
             result: JSON.stringify(results),
             score,
             UserId: req.session.user.id,
             ExerciseId: exerciseId
         });
+
+        logger.log({
+                level:   'info',
+                message: `User ${req.session.user.id} a soumis l'exercice ${exerciseId}`,
+                meta: {
+                  category: 'interaction',
+                  ip:       req.ip,
+                  method:   req.method,
+                  url:      req.originalUrl
+                }
+              });
 
         res.json({ success, score, results });
     } catch (error) {

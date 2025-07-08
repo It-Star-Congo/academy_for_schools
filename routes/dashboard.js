@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Course } = require('../models'); // Importation du modèle Course
+const { Course,  User, Exercise, Submission } = require('../models'); // Importation du modèle Course
 
 // Middleware pour vérifier si l'utilisateur est authentifié
 function isAuthenticated(req, res, next) {
@@ -64,6 +64,171 @@ router.get('/profile', isAuthenticated, async (req, res) => {
     }
 });
 
+router.get('/profile/:studentId/show', isAuthenticated, async (req, res) => {
+    try {
+        // Vérifie que req.session.user existe
+        if (!req.session.user || req.session.user.role === 'student') {
+            return res.redirect('/teacher/login');
+        }
+        studentId = req.params.studentId;
+        //const user = await User.findByPk(studentId);
+
+        const user = await User.findByPk(studentId, {
+      attributes: ['id', 'username', 'contact', 'firstname', 'name', 'birthdate', 'country', 'level', 'profile', 'cv', 'bio', 'abonnement', 'offers'],
+      include: [{
+        model: Course,
+        as: 'enrolledCourses',
+        attributes: ['id', 'name', 'description', 'teacher', 'image'],
+        through: { attributes: [] },
+        include: [{
+          model: Exercise,
+          as: 'Exercises',
+          attributes: ['id'],
+          include: [{
+            model: Submission,
+            as: 'Submissions',
+            where: { UserId : studentId },
+            attributes: ['score'],
+            required: false
+          }]
+        }]
+      }]
+    });
+
+    // Calcule le pourcentage de progression pour chaque cours
+    const coursesWithProgress = user.enrolledCourses.map(course => {
+      const scores = [];
+      course.Exercises.forEach(ex => {
+        ex.Submissions.forEach(s => scores.push(s.score));
+      });
+      const total = scores.reduce((acc, v) => acc + v, 0);
+      const count = scores.length;
+      const progress = count ? Math.round(total / count) : 0;
+      return { ...course.toJSON(), progress };
+    });
+
+        /* Simuler des cours avec progression (dans une vraie app, récupère depuis la BD)
+        const userCourses = [
+            { id: 1, name: 'Python', progress: 70, image: '/images/python.jpg' },
+            { id: 2, name: 'Java', progress: 50, image: '/uploads/files/1741206020433.pdf' },
+            { id: 3, name: 'C++', progress: 100, image: '/pictures/AcademyLogoTransparent-removebg-preview.png' },
+            { id: 4, name: 'Arduino', progress: 45, image: '/images/javascript.jpg' },
+            { id: 5, name: 'JavaScript', progress: 45, image: '/images/javascript.jpg' }
+        ];*/
+
+        // Assure-toi que req.session.user contient courses
+        //req.session.user.courses = coursesWithProgress; //userCourses;
+        userCourses = coursesWithProgress;
+
+        // Récupérer le solde de crédits de l'utilisateur
+        const userCredits = req.session.user.credits || 0;
+
+        res.render('profile2', { 
+            sessionUser : req.session.user,
+            user,
+            userCourses, 
+            credits: userCredits
+        });
+    } catch (error) {
+        console.error("Erreur lors de l'affichage du profil :", error);
+        res.status(500).send("Erreur interne du serveur");
+    }
+});
+
+
+router.get('/profile3', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    // Récupère l'utilisateur et ses cours inscrits, les exercices et les submissions
+    const user = await User.findByPk(userId, {
+      attributes: ['id', 'username', 'contact', 'firstname', 'name', 'birthdate', 'country', 'level', 'profile', 'cv', 'bio', 'abonnement', 'offers'],
+      include: [{
+        model: Course,
+        as: 'enrolledCourses',
+        attributes: ['id', 'name', 'description', 'teacher', 'image'],
+        through: { attributes: [] },
+        include: [{
+          model: Exercise,
+          as: 'Exercises',
+          attributes: ['id'],
+          include: [{
+            model: Submission,
+            where: { userId },
+            attributes: ['score'],
+            required: false
+          }]
+        }]
+      }]
+    });
+
+    // Calcule le pourcentage de progression pour chaque cours
+    const coursesWithProgress = user.enrolledCourses.map(course => {
+      const scores = [];
+      course.Exercises.forEach(ex => {
+        ex.Submissions.forEach(s => scores.push(s.score));
+      });
+      const total = scores.reduce((acc, v) => acc + v, 0);
+      const count = scores.length;
+      const progress = count ? Math.round(total / count) : 0;
+      return { ...course.toJSON(), progress };
+    });
+
+    // Met à jour la session et rend la vue
+    req.session.user.enrolledCourses = coursesWithProgress;
+    res.render('profile', {
+      user: { ...user.toJSON(), courses: coursesWithProgress },
+      credits: req.session.user.credits || 0
+    });
+  } catch (error) {
+    console.error('Erreur affichage profil :', error);
+    res.status(500).send('Erreur interne');
+  }
+});
+
+// Désinscription d'un cours
+router.post('/profile/courses/:courseId/unsubscribe', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const courseId = req.params.courseId;
+    const user = await User.findByPk(userId);
+    await user.removeEnrolledCourses(courseId);
+    res.redirect('/profile');
+  } catch (err) {
+    console.error('Désinscription échouée :', err);
+    res.status(500).send('Erreur interne');
+  }
+});
+
+// Formulaire de modification de profil
+router.get('/edit-profile', isAuthenticated, async (req, res) => {
+  const user = await User.findByPk(req.session.user.id, {
+    include: [{ model: Course, as: 'enrolledCourses', through: { attributes: [] } }]
+  });
+  res.render('edit-profile', { user, courses: user.enrolledCourses });
+});
+
+// Prise en compte des modifications de profil et de cours
+router.post('/edit-profile', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const { firstname, name, contact, birthdate, country, level, bio, abonnement } = req.body;
+    const user = await User.findByPk(userId);
+
+    // Mise à jour des champs
+    await user.update({ firstname, name, contact, birthdate, country, level, bio, abonnement });
+
+    // Gestion des cours conservés (checkboxes)
+    const keepCourseIds = Array.isArray(req.body.courses)
+      ? req.body.courses.map(id => parseInt(id))
+      : [];
+    await user.setEnrolledCourses(keepCourseIds);
+
+    res.redirect('/dash/profile');
+  } catch (error) {
+    console.error('Échec mise à jour profil :', error);
+    res.status(500).send('Erreur interne');
+  }
+});
 
 
 // Route de déconnexion

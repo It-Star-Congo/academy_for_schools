@@ -1,0 +1,130 @@
+<!-- submissions.ejs -->
+<!–– CSS interne pour mise en page pro/UX/UI ––>
+<style>
+  .submissions-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .submissions-container h2 {
+    text-align: center;
+    margin-bottom: 24px;
+    font-size: 2rem;
+    color: #333;
+  }
+  .exercise-block {
+    margin-bottom: 40px;
+  }
+  .exercise-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .exercise-header h3 {
+    font-size: 1.4rem;
+    color: #555;
+  }
+  .submission-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .submission-table th,
+  .submission-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 0.95rem;
+    color: #555;
+    text-align: left;
+  }
+  .submission-table th {
+    background: #f7f7f7;
+    font-weight: 600;
+    color: #333;
+  }
+  .submission-table tr:hover {
+    background: #fafafa;
+  }
+  .btn-view {
+    display: inline-block;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    background: #5b9bd5;
+    color: #fff;
+    border-radius: 6px;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-view:hover {
+    background: #4a89c8;
+  }
+  .btn-view:active {
+    transform: translateY(1px);
+  }
+  @media (max-width: 768px) {
+    .submission-table th:nth-child(3),
+    .submission-table td:nth-child(3) {
+      display: none;
+    }
+  }
+</style>
+
+<section class="submissions-container">
+  <h2>Soumissions du cours : <%= course.name %></h2>
+
+  <% data2.forEach(block => { %>
+    <div class="exercise-block">
+      <div class="exercise-header">
+        <h3>Exercice : <%= block.exercise.title %></h3>
+      </div>
+
+      <% if (block.studentEntries.length === 0) { %>
+        <p>Aucune soumission pour cet exercice.</p>
+      <% } else { %>
+        <table class="submission-table">
+          <thead>
+            <tr>
+              <th>Élève</th>
+              <th>Contact</th>
+              <th>Nb soumissions</th>
+              <th>Meilleur score</th>
+              <th>Score moyen</th>
+              <th>Dernière soumission</th>
+              <th>Voir meilleure</th>
+              <th>Voir dernière</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% block.studentEntries.forEach(entry => { %>
+              <tr>
+                <td><%= entry.user.username %></td>
+                <td><%= entry.user.contact %></td>
+                <td><%= entry.count %></td>
+                <td><%= entry.best.score %> %</td>
+                <td><%= entry.avg %> %</td>
+                <td><%= entry.last.toLocaleString() %></td>
+                <td>
+                  <a href="/teacher/courses/<%= course.id %>/exercises/<%= block.exercise.id %>/users/<%= entry.user.id %>/submissions/best"
+                     class="btn-view">
+                    Best
+                  </a>
+                </td>
+                <td>
+                  <a href="/teacher/courses/<%= course.id %>/exercises/<%= block.exercise.id %>/users/<%= entry.user.id %>/submissions/last"
+                     class="btn-view">
+                    Last
+                  </a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+  <% }) %>
+</section>

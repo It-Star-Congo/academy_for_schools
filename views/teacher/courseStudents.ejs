@@ -10,7 +10,7 @@
   <% } else { %>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
       <% students.forEach(student => { %>
-        <div class="bg-white shadow-md rounded-xl overflow-hidden p-4 flex items-center gap-4 hover:shadow-lg transition">
+        <a href="/dash/profile/<%=student.id%>/show"><div class="bg-white shadow-md rounded-xl overflow-hidden p-4 flex items-center gap-4 hover:shadow-lg transition">
           <img 
             src="<%= student.profile || '/images/default-avatar.png' %>" 
             alt="Photo de <%= student.name + ' ' + student.firstname || student.username %>" 
@@ -22,13 +22,17 @@
             </h4>
             <p class="text-sm text-gray-600"><%= student.contact %></p>
           </div>
-        </div>
+        </div></a>
       <% }) %>
     </div>
   <% } %>
 </div>
 
 <style>
+a {
+  text-decoration: none;
+  color: orangered;
+}
 
 .picture{
 

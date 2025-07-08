@@ -1,6 +1,7 @@
 <div class="container">
     <h1>Ajouter un Exercice</h1>
     <form action="/exercise/add" method="POST" class="exercise-form">
+        
         <label for="title">Titre :</label>
         <input type="text" name="title" id="title" placeholder="Titre de l'exercice" required>
 
@@ -8,12 +9,12 @@
         <select name="course" id="course" required>
             <option value="">Sélectionner un cours</option>
             <% courses.forEach(course => { %>
-                <option value="<%= course.name %>"><%= course.name %></option>
+                <option value="<%= course.id %>"><%= course.name %></option>
             <% }); %>
         </select>
 
         <label for="author">Autheur :</label>
-        <input type="text" name="author" id="author" placeholder="Autheur" required>
+        <input type="text" name="author" id="author" placeholder="Auteur" required>
 
         <label for="type">Type :</label>
         <select name="type" id="type" onchange="toggleFields()">

@@ -1,0 +1,229 @@
+<section class="profile-container">
+
+    <!-- Section A : Profil -->
+    <div class="profile-header">
+        <h2><%= user.username %></h2>
+        </br>
+        <img src="<%= user.profile %>" alt="Photo de profil" class="profile-pic">
+        <p><strong>Email :</strong> <%= user.email %></p>
+        <p><strong>Abonnement :</strong> <%= user.subscriptionType %></p>
+    </div>
+
+    <div class="profile-content">
+        <!-- Section B : Cours -->
+        <div class="courses-container">
+            <h3>Mes cours</h3>
+            <% userCourses.forEach(course => { %>
+                <div class="course-card">
+                    Donné par: <%= course.teacher %>
+                    <div class="course-info">
+                        <h3><%= course.name %></h3>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: <%= course.progress %>%;"></div>
+                        </div>
+                        <p><%= course.progress %>% complété</p>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+
+        <!-- Section C : Crédits -->
+        <div class="credits-section">
+            <h3>Classe : <span class="credit-amount"><%= user.credits || "S1A" %></span></h3>
+            <a href="/recharge" class="btn">Recharger</a>
+        </div>
+    </div>
+
+    <% if (sessionUser && sessionUser.role === 'admin') { %>
+    <!-- Section D : Actions (réservé aux admins) -->
+    <div class="actions">
+        <a href="/edit-profile" class="btn20">Modifier mon profil</a>
+        <a href="/delete-account" class="btn btn-delete" onclick="return confirm('Voulez-vous vraiment supprimer votre compte ?')">Supprimer mon compte</a>
+    </div>
+    <% } %>
+    <style>
+        .profile-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Section A : Profil */
+        .profile-header {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .profile-pic {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #ff6600;
+        }
+
+        .profile-header h2 {
+            margin: 10px 0 5px;
+            color:#f3932cd6
+        }
+
+        .profile-header p {
+            color: #666;
+            margin: 5px 0;
+        }
+
+        /* Layout principal : Sections B & C en ligne */
+        .profile-content {
+            display: flex;
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        /* Section B : Mes cours */
+        .courses-container {
+            flex: 2;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.05);
+            overflow-y: auto; /* Ajout de l'overflow-y pour activer le défilement vertical */
+            height: 300px; /* Fixer la hauteur du container */
+            border: 2px solid #ddd;
+            position : relative;
+            scroll-behavior: smooth; /* Défilement fluide */
+        }
+
+        .courses-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .courses-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .courses-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .courses-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .courses-container:hover {
+            box-shadow: inset 0px 0px 15px rgba(0, 0, 0, 0.1), 0 6px 12px rgba(0, 0, 0, 0.1); /* Ombre au survol */
+            border-color: #bbb;
+        }
+
+        /* Card de chaque cours */
+        .course-card {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 2px solid #ff6600;
+            min-height: 150px; /* Assurez-vous que la card a une hauteur minimale */
+            max-height: 160px;
+            display: flex;
+            flex-direction: column; /* Assurez-vous que la card soit en colonne */
+        }
+
+        /* Image du cours */
+        .course-teacher {
+            border-radius: 8px; /* Coins arrondis pour un rendu plus professionnel */
+            border: 2px solid #ff6600; /* Contour de la photo pour un effet de finition */
+        }
+
+        /* Informations sur le cours */
+        .course-info {
+            border-top: 1px solid #66666673;
+            padding: 10px;
+            text-align: center;
+            flex-grow: 1; /* Permet à la zone de texte d'occuper le reste de l'espace */
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            background: #ddd;
+            border-radius: 5px;
+            height: 8px;
+            margin: 10px 0;
+            position: relative;
+        }
+
+        .progress {
+            background: #ff6600;
+            height: 100%;
+            border-radius: 5px;
+        }
+
+
+        /* Section C : Crédits */
+        .credits-section {
+            flex: 1;
+            text-align: center;
+            background: #fff3e6;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #ff6600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .credits-section h3 {
+            color: #ff6600;
+            font-size: 1.5rem;
+        }
+
+        .credits-section .btn {
+            margin-top: 10px;
+        }
+
+        .credit-amount {
+            color: white; /* Définit la couleur du texte en blanc */
+            font-weight: bold; /* Facultatif : met le nombre en gras pour plus de visibilité */
+            text-shadow: 1px 1px 2px rgba(48, 43, 43, 0.500), -1px -1px 2px rgba(48, 43, 43, 0.500), 1px -1px 2px rgba(48, 43, 43, 0.500), -1px 1px 2px rgba(48, 43, 43, 0.500); /* Contour noir */
+        }
+
+        /* Section D : Actions */
+        .actions {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #ddd;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #ff6600;
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            margin: 5px;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #e55b00;
+        }
+
+        .btn-delete {
+            background: red;
+            border: none;
+        }
+
+        .btn-delete:hover {
+            background: darkred;
+        }
+    </style>
+</section>

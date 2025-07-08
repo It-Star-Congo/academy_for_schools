@@ -1,0 +1,192 @@
+<section class="edit-profile-container">
+  <h2>Modifier mon profil</h2>
+  <form action="/dash/edit-profile" method="POST" enctype="multipart/form-data">
+    <label>Prénom:
+      <input type="text" name="firstname" value="<%= user.firstname %>" required>
+    </label>
+    <label>Nom:
+      <input type="text" name="name" value="<%= user.name %>" required>
+    </label>
+    <label>Email:
+      <input type="email" name="contact" value="<%= user.contact %>" required>
+    </label>
+    <label>Date de naissance:
+      <input type="date" name="birthdate" value="<%= user.birthdate %>" required>
+    </label>
+    <label>Pays:
+      <input type="text" name="country" value="<%= user.country %>">
+    </label>
+    <label>Niveau:
+      <input type="text" name="level" value="<%= user.level %>">
+    </label>
+    <label>Bio:
+      <textarea name="bio"><%= user.bio %></textarea>
+    </label>
+    <label>Abonnement:
+      <select name="abonnement">
+        <option value="academic" <%= user.abonnement==='academic'? 'selected':'' %>>Académique</option>
+        <option value="premium" <%= user.abonnement==='premium'? 'selected':'' %>>Premium</option>
+      </select>
+    </label>
+
+    <fieldset>
+      <legend>Conserver les cours</legend>
+      <% courses.forEach(c => { %>
+        <label>
+          <input type="checkbox" name="courses" value="<%= c.id %>" checked>
+          <%= c.name %>
+        </label>
+      <% }) %>
+    </fieldset>
+
+    <button type="submit" class="btn">Enregistrer les changements</button>
+  </form>
+  <a href="/profile" class="btn2 btn">Annuler</a>
+</section>
+<style>
+  /* Container principal */
+  .edit-profile-container {
+    max-width: 600px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .edit-profile-container h2 {
+    text-align: center;
+    margin-bottom: 24px;
+    font-size: 1.8rem;
+    color: #333;
+  }
+
+  /* Formulaire en grille */
+  .edit-profile-container form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 30px;
+  }
+
+  .edit-profile-container label {
+    display: flex;
+    flex-direction: column;
+    color: #555;
+    font-size: 0.95rem;
+  }
+
+  .edit-profile-container input[type="text"],
+  .edit-profile-container input[type="email"],
+  .edit-profile-container input[type="date"],
+  .edit-profile-container select,
+  .edit-profile-container textarea {
+    margin-top: 6px;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+  }
+  .edit-profile-container input:focus,
+  .edit-profile-container select:focus,
+  .edit-profile-container textarea:focus {
+    outline: none;
+    border-color: #5b9bd5;
+  }
+
+  .edit-profile-container textarea {
+    resize: vertical;
+    min-height: 100px;
+    grid-column: span 2;
+  }
+
+  /* Fieldset et cours */
+  .edit-profile-container fieldset {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 16px;
+    grid-column: span 2;
+  }
+  .edit-profile-container legend {
+    padding: 0 8px;
+    font-weight: bold;
+    color: #333;
+  }
+  .edit-profile-container fieldset label {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 16px;
+    font-size: 0.9rem;
+  }
+  .edit-profile-container fieldset input[type="checkbox"] {
+    margin-right: 6px;
+  }
+
+  /* Boutons */
+  .edit-profile-container .btn {
+    grid-column: span 2;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    background: #f69319;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .edit-profile-container .btn:hover {
+    background: #4a89c8;
+  }
+  .edit-profile-container .btn:active {
+    transform: translateY(1px);
+  }
+  .edit-profile-container .btn2 {
+    grid-column: span 2;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    background: #cc0d0d;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+
+  /* Lien Annuler */
+  .edit-profile-container .btn + a {
+    display: inline-block;
+    text-align: center;
+    margin-top: 12px;
+    width: 100%;
+    font-size: 0.95rem;
+    color: #5b9bd5;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .edit-profile-container .btn + a:hover {
+    color: #3a7ab8;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .edit-profile-container form {
+      grid-template-columns: 1fr;
+    }
+    .edit-profile-container textarea {
+      grid-column: span 1;
+    }
+    .edit-profile-container fieldset {
+      grid-column: span 1;
+    }
+    .edit-profile-container .btn,
+    .edit-profile-container .btn + a {
+      grid-column: span 1;
+    }
+  }
+</style>

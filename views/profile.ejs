@@ -5,8 +5,8 @@
         <h2><%= user.username %></h2>
         </br>
         <img src="<%= user.profile %>" alt="Photo de profil" class="profile-pic">
-        <p><strong>Email :</strong> <%= user.email %></p>
-        <p><strong>Abonnement :</strong> <%= user.subscriptionType %></p>
+        <p><strong>Email :</strong> <%= user.contact %></p>
+        <p><strong>Abonnement :</strong> <%= user.abonnement %></p>
     </div>
 
     <div class="profile-content">
@@ -36,7 +36,7 @@
 
     <!-- Section D : Actions -->
     <div class="actions">
-        <a href="/edit-profile" class="btn20">Modifier mon profil</a>
+        <a href="/dash/edit-profile" class="btn20">Modifier mon profil</a>
         <a href="/delete-account" class="btn btn-delete" onclick="return confirm('Voulez-vous vraiment supprimer votre compte ?')">Supprimer mon compte</a>
     </div>
     <style>
@@ -127,6 +127,7 @@
             overflow: hidden;
             border: 2px solid #ff6600;
             min-height: 150px; /* Assurez-vous que la card a une hauteur minimale */
+            max-height: 160px;
             display: flex;
             flex-direction: column; /* Assurez-vous que la card soit en colonne */
         }

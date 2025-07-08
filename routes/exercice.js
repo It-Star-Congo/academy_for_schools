@@ -3,6 +3,7 @@ const router = express.Router();
 const { Exercise } = require('../models');
 const { Course } = require('../models'); // Importation du modèle Course
 const { User } = require('../models')
+const { Submission } = require('../models');
 
 async function getCoursesByTeacher(username) {
   try {
@@ -39,13 +40,26 @@ router.get('/', async (req, res) => {
   }
 });
 
+async function getBestScoreForUserExercise(userId, exerciseId) {
+  const best = await Submission.max('score', {
+    where: { userId, exerciseId }
+  });
+  return best || 0;
+}
+
 router.get('/exe/:exerciseId', async (req, res) => {
   try {
       const exercise = await Exercise.findByPk(req.params.exerciseId);
       if (!exercise) {
           return res.status(404).json({ error: 'Exercice non trouvé' });
       }
-      res.render('exercice', { exercise, username: req.session.user.username });
+      const userId = Number(req.session.user.id);
+      const exerciseId = Number(req.params.exerciseId)
+      const bestScore = await getBestScoreForUserExercise(Number(req.session.user.id), Number(req.params.exerciseId));
+      const attempts = await Submission.count({
+    where: { userId, exerciseId }
+  });
+      res.render('exercice', { exercise, username: req.session.user.username, bestScore, attempts });
   } catch (err) {
       console.error(err);
       res.status(500).json({ error: 'Erreur serveur' });
@@ -99,6 +113,8 @@ router.post('/course/:courseName/enroll', async (req, res) => {
 
     if (!isEnrolled) {
       await course.addStudent(user);
+      logger.logWithCategory('interaction', 'info',`CourseRegistration : User ${user.id}: ${user.name}  s'est inscrit au cours  ${course.id}`);
+
     }
 
     res.redirect(`/exercise/course/${req.params.courseName}`);
@@ -127,7 +143,8 @@ router.post('/add', async (req, res) => {
   console.log("ehla");
   try {
     const { title, course, author, type, description } = req.body;
-    let exerciseData = { title, course, author, type, description };
+    const lecours = await Course.findByPk(course);
+    let exerciseData = { title, course: lecours.name, author, type, description, CourseId: course };
     console.log(exerciseData);
 
     if (type === 'programmation') {
@@ -172,13 +189,22 @@ router.post('/add', async (req, res) => {
 
     console.log('ok2');
 
-    await Exercise.create(exerciseData);
+    let exoo = await Exercise.create(exerciseData);
+    logger.log({
+              level:   'info',
+              message: `Teacher ${user.id}: ${user.name} a créé l'exercice ${exoo.id}`,
+              meta: {
+                category: 'interaction',
+                ip:       req.ip,
+                method:   req.method,
+                url:      req.originalUrl
+              }
+            })
     console.log('ok3');
     res.redirect('/dash'); // Redirige vers la liste des exercices
   } catch (error) {
     console.error(error);
     console.log("mama na errreur");
-    console.log(error);
     res.status(500).render('error', { message: "Erreur lors de l'ajout de l'exercice" });
   }
   console.log("ehla2");
@@ -203,8 +229,29 @@ router.delete('/delete/:id', async (req, res) => {
     if (exercise.author === userName || userName === 'test' || userName === 'admin') {
       // Supprimer l'exercice
       await exercise.destroy();  // Méthode pour supprimer un enregistrement avec Sequelize
+
+      logger.log({
+              level:   'info',
+              message: `Teacher ${req.session.user.id}: : ${req.session.user.username} a supprimé l'exercice ${exerciseId}`,
+              meta: {
+                category: 'interaction',
+                ip:       req.ip,
+                method:   req.method,
+                url:      req.originalUrl
+              }
+            });
       return res.status(200).json({ success: true, message: 'Exercice supprimé' });
     } else {
+      logger.log({
+              level:   'error',
+              message: `Teacher ${req.session.user.id}: ${req.session.user.username} a voulu supprimé l'exercice ${exerciseId}`,
+              meta: {
+                category: 'interaction',
+                ip:       req.ip,
+                method:   req.method,
+                url:      req.originalUrl
+              }
+            })
       return res.status(403).json({ success: false, message: 'Vous n\'êtes pas autorisé à supprimer cet exercice' });
     }
   } catch (err) {

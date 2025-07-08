@@ -1,0 +1,243 @@
+
+
+<style>
+  /* Container principal */
+  .logs-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    font-family: 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* Titre */
+  .logs-container h1 {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+    color: #111827;
+    font-weight: 600;
+  }
+
+  /* Formulaire de filtres */
+  .filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .filter-form .filter-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .filter-form label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.25rem;
+  }
+
+  .filter-form select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    color: #111827;
+    background: #f9fafb;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .filter-form select:focus {
+    outline: none;
+    border-color: #2563eb;
+    background: #ffffff;
+  }
+
+  /* Wrapper pour table scrollable */
+  .logs-table-wrapper {
+    overflow-x: auto;
+  }
+
+  /* Table des logs */
+  .logs-table {
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  }
+
+  .logs-table thead {
+    background: #f3f4f6;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  .logs-table th,
+  .logs-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.875rem;
+    color: #374151;
+    white-space: nowrap;
+  }
+
+  .logs-table th {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .logs-table tr:nth-child(even) {
+    background: #f9fafb;
+  }
+
+  .logs-table tr:hover {
+    background: #f1f5f9;
+  }
+
+  /* Badges de niveau */
+  .badge {
+    display: inline-block;
+    padding: 0.25em 0.5em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .badge-error {
+    background-color: #fee2e2;
+    color: #b91c1c;
+  }
+
+  .badge-warn {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+
+  .badge-info {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  .badge-http {
+    background-color: #e5e7eb;
+    color: #374151;
+  }
+
+    /* Container du bouton d’export */
+  .export-container {
+    text-align: right;
+    margin-bottom: 1rem;
+  }
+
+  /* Bouton Télécharger JSON */
+  .export-btn {
+    display: inline-block;
+    background-color: #16a34a;
+    color: #ffffff;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.2s ease-in-out;
+  }
+  .export-btn:hover {
+    background-color: #15803d;
+  }
+
+
+  /* Responsive : on masque colonnes 4–6 en petit écran */
+  @media (max-width: 768px) {
+    .logs-table th:nth-child(4),
+    .logs-table td:nth-child(4),
+    .logs-table th:nth-child(5),
+    .logs-table td:nth-child(5),
+    .logs-table th:nth-child(6),
+    .logs-table td:nth-child(6) {
+      display: none;
+    }
+  }
+</style>
+
+<section class="logs-container">
+  <h1>Logs système</h1>
+
+  <!-- Filtre Catégorie & Date -->
+  <form method="GET" action="/admin/logs" class="filter-form">
+    <div class="filter-group">
+      <label for="category">Catégorie</label>
+      <select name="category" id="category" onchange="this.form.submit()">
+        <% categories.forEach(cat => { %>
+          <option value="<%= cat %>" <%= cat===category?'selected':'' %>><%= cat %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="date">Date</label>
+      <select name="date" id="date" onchange="this.form.submit()">
+        <% dates.forEach(d => { %>
+          <option value="<%= d %>" <%= d===selectedDate?'selected':'' %>><%= d %></option>
+        <% }) %>
+      </select>
+    </div>
+  </form>
+
+  <!-- Bouton d’export JSON -->
+  <div class="export-container">
+    <a 
+      href="/admin/logs/export?category=<%= category %>" 
+      class="export-btn"
+    >
+      Télécharger JSON
+    </a>
+  </div>
+
+  <% if (!logs.length) { %>
+    <p style="text-align:center; color:#6b7280; margin-top:2rem;">
+      Aucun log disponible pour cette sélection.
+    </p>
+  <% } else { %>
+    <div class="logs-table-wrapper">
+      <table class="logs-table">
+        <thead>
+          <tr>
+            <th>Horodatage</th>
+            <th>Niveau</th>
+            <th>IP</th>
+            <th>Méthode</th>
+            <th>URL</th>
+            <th>Statut</th>
+            <th>Durée</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% logs.forEach(log => {
+               let cls = 'badge-http';
+               if (log.level === 'error') cls = 'badge-error';
+               else if (log.level === 'warn') cls = 'badge-warn';
+               else if (log.level === 'info') cls = 'badge-info';
+          %>
+            <tr>
+              <td><%= log.timestamp %></td>
+              <td><span class="badge <%= cls %>"><%= log.level.toUpperCase() %></span></td>
+              <td><%= log.ip || '-' %></td>
+              <td><%= log.method   || '-' %></td>
+              <td><%= log.url      || '-' %></td>
+              <td><%= log.status   || '-' %></td>
+              <td><%= log.duration || '-' %></td>
+              <td><%= log.message %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
