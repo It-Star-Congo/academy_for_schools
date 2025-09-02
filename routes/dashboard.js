@@ -15,8 +15,6 @@ router.get('/', isAuthenticated, async (req, res) => {
     try {
         // Cours simulés
         const simulatedCourses = [
-            { id: 1, name: 'python' },
-            { id: 2, name: 'Course 2' }
         ];
 
         // Récupération des cours en base de données
@@ -82,7 +80,7 @@ router.get('/profile/:studentId/show', isAuthenticated, async (req, res) => {
         through: { attributes: [] },
         include: [{
           model: Exercise,
-          as: 'Exercises',
+          as: 'exercises',
           attributes: ['id'],
           include: [{
             model: Submission,
@@ -149,7 +147,7 @@ router.get('/profile3', isAuthenticated, async (req, res) => {
         through: { attributes: [] },
         include: [{
           model: Exercise,
-          as: 'Exercises',
+          as: 'exercises',
           attributes: ['id'],
           include: [{
             model: Submission,
@@ -162,15 +160,25 @@ router.get('/profile3', isAuthenticated, async (req, res) => {
     });
 
     // Calcule le pourcentage de progression pour chaque cours
-    const coursesWithProgress = user.enrolledCourses.map(course => {
-      const scores = [];
-      course.Exercises.forEach(ex => {
-        ex.Submissions.forEach(s => scores.push(s.score));
+    const coursesWithProgress = (user.enrolledCourses || []).map(course => {
+    // on prend la représentation "JSON" pour simplifier
+    const data = course.toJSON();
+    const exercises = data.exercises || [];      // <-- alias 'exercises'
+    let total = 0, count = 0;
+
+    exercises.forEach(ex => {
+      // selon votre association, ce sera peut-être 'submissions' ou 'Submissions'
+      const subs = ex.submissions || ex.Submissions || [];
+      subs.forEach(s => {
+        if (typeof s.score === 'number') {
+          total += s.score;
+          count++;
+        }
       });
-      const total = scores.reduce((acc, v) => acc + v, 0);
-      const count = scores.length;
-      const progress = count ? Math.round(total / count) : 0;
-      return { ...course.toJSON(), progress };
+    });
+
+    const progress = count > 0 ? Math.round(total / count) : 0;
+    return { ...data, progress };
     });
 
     // Met à jour la session et rend la vue
@@ -200,8 +208,9 @@ router.post('/profile/courses/:courseId/unsubscribe', isAuthenticated, async (re
 });
 
 // Formulaire de modification de profil
-router.get('/edit-profile', isAuthenticated, async (req, res) => {
-  const user = await User.findByPk(req.session.user.id, {
+router.get('/edit-profile/:userId/student', isAuthenticated, async (req, res) => {
+  const userId = req.params.userId;
+  const user = await User.findByPk(userId, {
     include: [{ model: Course, as: 'enrolledCourses', through: { attributes: [] } }]
   });
   res.render('edit-profile', { user, courses: user.enrolledCourses });
@@ -228,6 +237,11 @@ router.post('/edit-profile', isAuthenticated, async (req, res) => {
     console.error('Échec mise à jour profil :', error);
     res.status(500).send('Erreur interne');
   }
+});
+
+// Formulaire de modification de profil
+router.get('/privacy', (req, res) => {
+  res.render('privacy', {lastUpdated : '24/06/2025', siteName : 'IT Star Africa', contactEmail: 'it-star-congo@gmail.com'});
 });
 
 

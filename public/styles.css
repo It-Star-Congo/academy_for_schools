@@ -18,6 +18,69 @@ textarea {
 width: 100%;
 height: 200px;
 }
+
+/* Empêche le footer de recouvrir le contenu */
+.content {
+  padding-bottom: 80px; /* hauteur du footer + marge */
+}
+
+/* Style principal du footer */
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #020100; /* noir */
+  color: #f9f9f9;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.3);
+  padding: 15px 20px;
+  z-index: 1000;
+}
+
+/* La liste interne */
+.nav-links2 {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+/* Chaque lien */
+.nav-links2 li {
+  margin: 0 20px;
+}
+
+/* Style des ancres */
+.nav-links2 a {
+  color: #f9f9f9;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.25s ease-in-out;
+}
+
+/* Effet au survol 
+.nav-links2 a:hover {
+  color: #ff6600; /* orange IT-Star 
+}*/
+
+/* Optionnel : séparer les liens par une petite ligne verticale */
+.nav-links2 li + li {
+  position: relative;
+  padding-left: 20px;
+}
+.nav-links2 li + li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 14px;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
 /* Styles généraux */
 
 /* Barre de navigation */
@@ -25,7 +88,7 @@ height: 200px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #ff6600; /* Orange */
+    /*background-color: #ff6600;  Orange */
     padding: 15px 30px;
 }
 

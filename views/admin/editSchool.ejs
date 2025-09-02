@@ -1,0 +1,175 @@
+
+    <style>
+    :root {
+      --primary-color:   <%= theme.primaryColor %>;
+      --secondary-color: <%= theme.secondaryColor %>;
+      --font-family:     '<%= theme.fontFamily %>';
+    }
+    /* admin-edit-school.css */
+
+    /* Variables du thème déjà définies via inline <style> */
+
+    body {
+    background-color: #f5f7fa;
+    font-family: var(--font-family);
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    }
+
+    header h1 {
+    text-align: center;
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin: 40px 0 20px;
+    }
+
+    main {
+    max-width: 720px;
+    margin: auto;
+    padding: 0 20px 40px;
+    }
+
+    main form {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+    }
+
+    main form .alert-error {
+    background: #fdecea;
+    color: #e33e3e;
+    border-left: 4px solid #f5c6cb;
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    }
+
+    main form div {
+    margin-bottom: 20px;
+    }
+
+    main form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #444;
+    }
+
+    main form input[type="text"],
+    main form input[type="email"],
+    main form input[type="date"],
+    main form input[type="color"],
+    main form input[type="password"],
+    main form select,
+    main form input[type="file"] {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #f9f9f9;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+    font-size: 1rem;
+    }
+
+    main form input:focus,
+    main form select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background-color: #ffffff;
+    }
+
+    main form img {
+    display: block;
+    max-height: 80px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    main form .form-actions {
+    text-align: center;
+    margin-top: 30px;
+    }
+
+    main form button[type="submit"] {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    padding: 12px 0;
+    width: 100%;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    }
+
+    main form button[type="submit"]:hover {
+    background-color: var(--secondary-color);
+    }
+
+    .color1, .color2 {
+        min-height: 2.5em;
+        width: 2.5em;
+        padding: 0;
+        border: none;
+        cursor: pointer;
+    }
+
+  </style>
+  <header>
+    <h1>⚙️ Paramètres de l’école</h1>
+  </header>
+
+  <main>
+    <% if (typeof error !== 'undefined') { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <form action="/admin/school" method="POST" enctype="multipart/form-data">
+      <div>
+        <label for="name">Nom de l’école *</label>
+        <input type="text" id="name" name="name" value="<%= school.name %>" required>
+      </div>
+
+      <div>
+        <label for="primaryColor">Couleur principale</label>
+        <input class = "color1" type="color" id="primaryColor" name="primaryColor" value="<%= school.primaryColor || '#0055a4' %>">
+      </div>
+
+      <div>
+        <label for="secondaryColor">Couleur secondaire</label>
+        <input class = "color2" type="color" id="secondaryColor" name="secondaryColor" value="<%= school.secondaryColor || '#ffc600' %>">
+      </div>
+
+      <div>
+        <label for="contactEmail">Email de contact</label>
+        <input type="email" id="contactEmail" name="contactEmail" value="<%= school.contactEmail || '' %>">
+      </div>
+
+      <div>
+        <label for="contactPhone">Téléphone de contact</label>
+        <input type="text" id="contactPhone" name="contactPhone" value="<%= school.contactPhone || '' %>">
+      </div>
+
+      <div>
+        <label for="contactAddress">Adresse de contact</label>
+        <input type="text" id="contactAddress" name="contactAddress" value="<%= school.contactAddress || '' %>">
+      </div>
+
+      <div>
+        <% if (school.logo) { %>
+          <p>Logo actuel :</p>
+          <img src="<%= school.logo %>" alt="Logo" style="max-height:80px">
+        <% } %>
+        <label for="logo">Modifier le logo</label>
+        <input type="file" id="logo" name="logo" accept="image/*">
+      </div>
+
+      <button type="submit" class="btn-primary">Enregistrer</button>
+    </form>
+  </main>
+

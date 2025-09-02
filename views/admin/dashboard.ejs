@@ -1,0 +1,175 @@
+<!-- views/admin/dashboard.ejs -->
+<div class="admin-dashboard">
+  <h1>Tableau de bord administrateur</h1>
+
+  <a class="btn2" href="/admin/logs">Voir les Logs</a></br></br>
+  <a class="btn3" href="/admin/school">Paramètres d'école</a></br></br>
+
+  <div class="stats-cards">
+    <a class="card" href="/admin/students">
+        <div class="card-icon">🎓</div></br>
+        <div class="card-content">
+          <div class="card-number"><%= studentCount %></div>
+          <div class="card-label">Élèves</div>
+        </div>
+    </a>
+    <a class="card" href="/admin/teachers">
+        <div class="card-icon">👩‍🏫</div></br>
+        <div class="card-content">
+          <div class="card-number"><%= teacherCount %></div>
+          <div class="card-label">Professeurs</div>
+        </div>
+      
+    </a>
+    <a class="card" href="/admin/classes">
+        <div class="card-icon">🏫</div></br>
+        <div class="card-content">
+          <div class="card-number"><%= classCount %></div>
+          <div class="card-label">Classes</div>
+        </div>
+    </a>
+    <a class="card" href="/admin/courses">
+        <div class="card-icon">📚</div></br>
+        <div class="card-content">
+          <div class="card-number"><%= courseCount %></div>
+          <div class="card-label">Cours</div>
+        </div>
+
+    </a>
+  </div>
+
+  <!--<div class="admin-nav">
+    <a class="btn" href="/admin/students">Gérer les élèves</a>
+    <a class="btn" href="/admin/teachers">Gérer les professeurs</a>
+    <a class="btn" href="/admin/classes">Gérer les classes</a>
+    <a class="btn" href="/admin/courses">Gérer les cours</a>
+  </div>-->
+</div>
+<style>
+
+a {
+  text-decoration: none;
+}
+    :root {
+  --primary: #0052cc;
+  --primary-color: <%= theme.primaryColor %>;
+  --secondary: #edf2ff;
+  --accent: #ff7f50;
+  --text-dark: #1a1a1a;
+  --text-light: #ffffff;
+  --radius: 8px;
+  --transition: 0.3s ease;
+}
+
+.admin-dashboard {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  color: var(--text-dark);
+}
+
+.admin-dashboard h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 2.5rem;
+  letter-spacing: 1px;
+  color: var(--text-dark);
+}
+
+.stats-cards {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.card {
+  background: var(--secondary);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  flex: 1 1 250px;
+  max-width: 200px;
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  transition: transform var(--transition), box-shadow var(--transition);
+  border: 1px solid var(--primary-color)
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  border: 2.5px solid var(--primary-color)
+}
+
+.card-icon {
+  font-size: 2.5rem;
+  margin-right: 15px;
+  color: var(--accent);
+}
+
+.card-content {
+  text-align: left;
+}
+
+.card-number {
+  font-size: 2rem;
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+.card-label {
+  font-size: 1rem;
+  color: #555;
+  margin-top: 4px;
+}
+
+.admin-nav {
+  text-align: center;
+}
+
+.admin-nav .btn {
+  display: inline-block;
+  margin: 0 10px;
+  padding: 12px 24px;
+  background: var(--primary);
+  color: var(--text-light);
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: var(--radius);
+  transition: background var(--transition), transform var(--transition);
+}
+
+.btn2 {
+  display: inline-block;
+  margin: 0 10px;
+  padding: 12px 24px;
+  background: --primary-color;
+  color: var(--text-light);
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: var(--radius);
+  transition: background var(--transition), transform var(--transition);
+}
+.btn3 {
+  display: inline-block;
+  margin: 0 10px;
+  padding: 12px 24px;
+  background: white;
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: var(--radius);
+  border: 1px solid var(--primary-color);
+  transition: background var(--transition), transform var(--transition);
+}
+
+
+.admin-nav .btn:hover {
+  background: darken(var(--primary), 10%);
+  transform: translateY(-2px);
+}
+
+</style>

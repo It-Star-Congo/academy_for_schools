@@ -87,7 +87,32 @@
                 <textarea name="response" placeholder="Écrivez votre réponse ici"></textarea>
                 <button class="btne" onclick="submitExercise(event)">Soumettre</button>
             </form>
-        <% } %>
+        <% }  else if (exercise.type === 'texte_trous') { %>
+            <h2>Texte à trous</h2>
+            <form id="fillBlanksForm" data-type="texte_trous">
+                <input type="hidden" name="exerciseId" value="<%= exercise.id %>">
+
+                <p class="fill-blanks-text">
+                <% 
+                    // on split sur "__" pour récupérer les parties fixes et les emplacements à remplir
+                    const parts = exercise.textWithBlanks.split('__');
+                    parts.forEach((part, idx) => { 
+                %>
+                    <%= part %>
+                    <% if (idx < parts.length - 1) { %>
+                    <input 
+                        type="text" 
+                        name="blank-<%= idx %>" 
+                        class="blank-input" 
+                        placeholder="…" 
+                        required
+                    >
+                    <% } %>
+                <% }); %>
+                </p>
+                <button class="btne" onclick="submitExercise(event)">Soumettre</button>
+            </form>
+        <% } %> 
         
         
         
@@ -101,6 +126,12 @@
         </div>
     </div>
     <style>
+
+        :root {
+        --primary-color: <%= theme.primaryColor %>;
+        --secondary-color: <%= theme.secondaryColor %>;
+        --font-family: '<%= theme.fontFamily %>';
+        }
         .exercise-container {
             max-width: 900px;
             margin: 0 auto;
@@ -110,7 +141,7 @@
         }
 
         .titre-ligne-orange {
-            border-bottom: 2px solid #ff6600; /* Définit une bordure inférieure orange de 2 pixels */
+            border-bottom: 2px solid --primary-color; /* Définit une bordure inférieure orange de 2 pixels */
             padding-bottom: 5px; /* Ajoute un peu d'espace entre le titre et la ligne */
             margin-bottom: 10px; /* Ajoute un peu d'espace en dessous de la ligne */
         }
@@ -280,8 +311,25 @@
         }
 
         .sidebar-content h3 {
-            color:#ff6600;
+            color:var(--primary-color);
         }
+        .fill-blanks-text {
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .blank-input {
+            display: inline-block;
+            width: auto;
+            min-width: 50px;
+            padding: 3px 6px;
+            margin: 0 4px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            vertical-align: middle;
+        }
+
     </style>
 
     <script>
@@ -411,6 +459,12 @@
                 payload.answers = answers;
             } else if (exerciseType === "redaction") {
                 payload.response = document.querySelector('textarea[name="response"]').value;
+            }else if (exerciseType === "texte_trous") {
+                const answers = {};
+                document.querySelectorAll('.blank-input').forEach(input => {
+                answers[input.name] = input.value;
+                });
+                payload.answers = answers;
             }
 
             fetch('/submissions/submit', {

@@ -1,0 +1,151 @@
+<style>
+  :root {
+    --primary: #4f46e5;
+    --bg-light: #f9fafb;
+    --text-color: #374151;
+    --white: #ffffff;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+  }
+  .container {
+    max-width: 768px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  @media (min-width: 1024px) {
+    .main-grid {
+      grid-template-columns: 1fr 3fr;
+    }
+    .toc {
+      position: sticky;
+      top: 2rem;
+    }
+  }
+  .toc {
+    background-color: var(--white);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    padding: 1.5rem;
+  }
+  .toc h3 {
+    margin-bottom: 1rem;
+    font-size: 1.125rem;
+    color: var(--text-color);
+  }
+  .toc ul {
+    list-style: decimal inside;
+    padding-left: 0;
+    margin: 0;
+  }
+  .toc a {
+    display: block;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: color 0.3s;
+    margin-bottom: 0.5rem;
+  }
+  .toc a:hover {
+    color: var(--primary);
+  }
+  .section {
+    background-color: var(--white);
+    border-left: 4px solid var(--primary);
+    border-radius: 0.5rem;
+    padding: 2rem;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    word-wrap: break-word;
+  }
+  .section h2 {
+    color: var(--primary);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .section p,
+  .section li {
+    color: var(--text-color);
+    line-height: 1.6;
+    text-align: justify;
+  }
+  .section ul {
+    list-style-position: inside;
+    margin-left: 1rem;
+    padding: 0;
+  }
+  .section ul li {
+    margin-bottom: 0.5rem;
+  }
+</style>
+
+<main class="container main-grid">
+  <!-- Sommaire -->
+  <aside class="toc">
+    <h3>Sommaire</h3>
+    <ul>
+      <li><a href="#introduction">Introduction</a></li>
+      <li><a href="#collecte">1. Collecte des informations</a></li>
+      <li><a href="#utilisation">2. Utilisation des données</a></li>
+      <li><a href="#partage">3. Partage des informations</a></li>
+      <li><a href="#securite">4. Sécurité</a></li>
+      <li><a href="#droits">5. Vos droits</a></li>
+      <li><a href="#modifications">6. Modifications</a></li>
+    </ul>
+  </aside>
+
+  <!-- Contenu Principal -->
+  <article>
+    <section id="introduction" class="section">
+      <h2>Introduction</h2>
+      <p>Chez <span class="font-semibold"><%= siteName %></span>, nous nous engageons à protéger et respecter votre vie privée. Cette politique détaille comment nous collectons, utilisons et protégeons vos informations personnelles.</p>
+    </section>
+
+    <section id="collecte" class="section">
+      <h2>1. Collecte des informations</h2>
+      <ul>
+        <li><span class="font-semibold">Informations fournies :</span> Nom, adresse e-mail, coordonnées.</li>
+        <li><span class="font-semibold">Données techniques :</span> Adresse IP, type de navigateur, journaux de connexion.</li>
+        <li><span class="font-semibold">Cookies :</span> Données de navigation pour améliorer l’expérience.</li>
+      </ul>
+    </section>
+
+    <section id="utilisation" class="section">
+      <h2>2. Utilisation des données</h2>
+      <ul>
+        <li>Personnaliser et optimiser nos services.</li>
+        <li>Vous informer des nouveautés et offres.</li>
+        <li>Assurer la sécurité et prévenir la fraude.</li>
+      </ul>
+    </section>
+
+    <section id="partage" class="section">
+      <h2>3. Partage des informations</h2>
+      <ul>
+        <li>Prestataires de confiance (hébergement, paiement).</li>
+        <li>Autorités compétentes si requis par la loi.</li>
+      </ul>
+    </section>
+
+    <section id="securite" class="section">
+      <h2>4. Sécurité</h2>
+      <p>Des mesures techniques et organisationnelles sont en place pour garantir l’intégrité et la confidentialité de vos données.</p>
+    </section>
+
+    <section id="droits" class="section">
+      <h2>5. Vos droits</h2>
+      <ul>
+        <li>Droit d’accès, de rectification et d’effacement.</li>
+        <li>Droit à la portabilité des données.</li>
+        <li>Droit d’opposition ou de limitation du traitement.</li>
+      </ul>
+      <p>Pour exercer ces droits, contactez : <a href="mailto:<%= contactEmail %>"><%= contactEmail %></a>.</p>
+    </section>
+
+    <section id="modifications" class="section">
+      <h2>6. Modifications</h2>
+      <p>Cette politique peut être mise à jour. Toute modification sera publiée ici avec une nouvelle date de révision.</p>
+    </section>
+  </article>
+</main>

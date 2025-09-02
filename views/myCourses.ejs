@@ -25,6 +25,11 @@
 
 
 <style>
+    :root {
+        --primary-color: <%= theme.primaryColor %>;
+        --secondary-color: <%= theme.secondaryColor %>;
+        --font-family: '<%= theme.fontFamily %>';
+        }
 .course-container {
     flex: 1; /* Permet aux blocs de prendre un espace égal */
     max-width: 48%; /* Empêche qu'ils soient trop larges */
@@ -37,7 +42,7 @@
 
 
 .course-title {
-    color: #ff6600;
+    color: var(--primary-color);
     text-align: center;
 }
 
@@ -68,7 +73,7 @@
 }
 
 .exercise-item:hover {
-    background: #ff6600;
+    background: var(--primary-color);
     color: white;
 }
 

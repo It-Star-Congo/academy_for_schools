@@ -17,7 +17,7 @@ module.exports = (sequelize) => {
       allowNull: false 
     },
     role: { // Ajout d’un rôle (étudiant ou professeur)
-      type: DataTypes.ENUM('student', 'teacher'),
+      type: DataTypes.ENUM('student', 'teacher', 'admin'),
       allowNull: false,
       defaultValue: 'student'
     },
@@ -63,18 +63,41 @@ module.exports = (sequelize) => {
       type: DataTypes.TEXT, 
       allowNull: true 
     },
+    schoolId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: { model: 'Schools', key: 'id' }
+    },
+    classId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Classes',
+        key: 'id'
+      },
+      allowNull: true
+    }
+
   });
 
 
 
   // Association avec les cours (un utilisateur peut être inscrit à plusieurs cours)
   User.associate = (models) => {
+    
     User.belongsToMany(models.Course, { 
       through: 'UserCourses', 
       foreignKey: 'userId',
       otherKey: 'courseId',
       as: 'courses' 
     });
+    User.belongsTo(models.Class, { 
+      foreignKey: 'classId',
+      as: 'class' 
+    });
+
+    User.belongsTo(models.School, {
+      foreignKey: 'schoolId', 
+      as: 'school' });
   };
 
   return User;

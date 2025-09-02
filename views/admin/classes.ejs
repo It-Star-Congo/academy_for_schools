@@ -1,0 +1,225 @@
+<% /* views/admin/classes.ejs */ %>
+
+<style>
+  :root {
+    --primary: #0052cc;
+    --secondary-bg: #f5f7fa;
+    --card-bg: #ffffff;
+    --border-color: #e0e0e0;
+    --text-dark: #1a1a1a;
+    --radius: 6px;
+    --transition: 0.3s ease;
+    --primary-color: <%= theme.primaryColor %>;
+    --secondary-color: <%= theme.secondaryColor %>;
+    --font-family: '<%= theme.fontFamily %>';
+    }
+  
+
+  .admin-classes {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+  }
+
+  .admin-classes .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+
+  .admin-classes h1 {
+    font-size: 2rem;
+    color: var(--primary);
+    margin: 0;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--radius);
+    text-decoration: none;
+    font-weight: 600;
+    transition: background var(--transition), transform var(--transition);
+  }
+
+  .btn-primary:hover {
+    background: #0041a8;
+    transform: translateY(-2px);
+  }
+
+  .actions {
+  display: inline-flex;
+  gap: 8px;
+}
+.btn-secondary {
+  background: var(--primary-color);
+  color:var(--secondary-color);
+  padding: 4px 8px;
+  padding-top: 5%;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  text-decoration: none;
+  position: center;
+}
+
+.btn-secondary2 {
+  background-color: white; 
+  color:var(--primary-color);
+  padding: 4px 8px;
+  padding-top: 5%;
+  border: 1px solid var(--primary-color);;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  text-decoration: none;
+  position: center;
+}
+.btn-danger {
+  background: #e74c3c;
+  color: #fff;
+  padding: 4px 8px;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+}
+
+
+  .classes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  details.class-card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    overflow: hidden;
+    transition: box-shadow var(--transition);
+  }
+
+  details.class-card:hover {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+
+  details.class-card summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 14px 18px;
+    list-style: none;
+    background: var(--secondary-bg);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-dark);
+  }
+
+  details.class-card[open] summary {
+    background: #e8ebee;
+  }
+
+  .toggle-icon {
+    transition: transform var(--transition);
+  }
+
+  details.class-card[open] .toggle-icon {
+    transform: rotate(180deg);
+  }
+
+  .class-details {
+    display: flex;
+    gap: 20px;
+    padding: 16px;
+    background: #fafbfc;
+  }
+
+  .section {
+    flex: 1;
+  }
+
+  .section h3 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    color: var(--primary);
+  }
+
+  .section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .section li {
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-dark);
+  }
+
+  .section p {
+    margin: 0;
+    color: #666;
+  }
+</style>
+
+<div class="admin-classes">
+  <div class="header">
+    <h1>🏫 Gestion des classes</h1>
+    <a href="/admin/classes/new" class="btn-primary">+ Nouvelle classe</a>
+  </div>
+
+  <div class="classes-list">
+    <% classes.forEach(cls => { %>
+      <details class="class-card">
+        <summary>
+          <span><%= cls.name %></span>
+          <div class="actions">
+            <a href="/admin/classes/<%= cls.id %>/students" class="btn-secondary">Gérer élèves</a>
+            <a href="/admin/classes/<%= cls.id %>/courses" class="btn-secondary2">lier un cours à cette classe</a>
+            <form
+              action="/admin/classes/<%= cls.id %>/delete"
+              method="POST"
+              onsubmit="return confirm('Supprimer la classe « <%= cls.name %> » ?');"
+              style="display:inline"
+            >
+              <button type="submit" class="btn-danger">Supprimer</button>
+            </form>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </summary>
+        <div class="class-details">
+          <div class="section">
+            <h3>Élèves</h3>
+            <% if (cls.students && cls.students.length) { %>
+              <ul>
+                <% cls.students.forEach(stu => { %>
+                  <li><%= stu.displayName || stu.username %></li>
+                <% }) %>
+              </ul>
+            <% } else { %>
+              <p>Aucun élève inscrit.</p>
+            <% } %>
+          </div>
+          <div class="section">
+            <h3>Cours</h3>
+            <% if (cls.courses && cls.courses.length) { %>
+              <ul>
+                <% cls.courses.forEach(cour => { %>
+                  <li><%= cour.name %></li>
+                <% }) %>
+              </ul>
+            <% } else { %>
+              <p>Aucun cours associé.</p>
+            <% } %>
+          </div>
+        </div>
+      </details>
+    <% }) %>
+  </div>
+</div>

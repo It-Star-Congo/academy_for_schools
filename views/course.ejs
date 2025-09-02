@@ -58,6 +58,11 @@
 
 
 <style>
+    :root {
+        --primary-color: <%= theme.primaryColor %>;
+        --secondary-color: <%= theme.secondaryColor %>;
+        --font-family: '<%= theme.fontFamily %>';
+        }
 
 a {
     text-decoration: none;
@@ -105,7 +110,7 @@ a {
 }
 
 .course-title {
-    color: #ff6600;
+    color: var(--primary-color);
     text-align: center;
 }
 
@@ -122,7 +127,7 @@ a {
 }
 .exercise-link2 {
     border: 1px black solid;
-    background-color: #ff6600;
+    background-color: var(--primary-color);
     
     width: fit-content;
     height:auto; 
@@ -142,7 +147,7 @@ a {
 }
 
 .exercise-item:hover {
-    background: #ff6600;
+    background: var(--primary-color);
     color: white;
 }
 
@@ -192,7 +197,7 @@ a {
 }
 
 .swiper-button-prev, .swiper-button-next {
-    color: #ff6600; /* Couleur des flèches de navigation */
+    color: var(--primary-color); /* Couleur des flèches de navigation */
     /*background-color: #ecebebbd;*/
     border: 1px gray unset;
 }

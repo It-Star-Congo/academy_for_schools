@@ -44,6 +44,11 @@
   <a href="/profile" class="btn2 btn">Annuler</a>
 </section>
 <style>
+  :root {
+        --primary-color: <%= theme.primaryColor %>;
+        --secondary-color: <%= theme.secondaryColor %>;
+        --font-family: '<%= theme.fontFamily %>';
+        }
   /* Container principal */
   .edit-profile-container {
     max-width: 600px;
@@ -130,7 +135,7 @@
     font-size: 1rem;
     font-weight: 600;
     text-transform: uppercase;
-    background: #f69319;
+    background: var(--primary-color);
     color: #fff;
     border: none;
     border-radius: 6px;

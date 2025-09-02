@@ -1,3 +1,28 @@
+
+<style>
+  :root {
+        --primary-color: <%= theme.primaryColor %>;
+        --secondary-color: <%= theme.secondaryColor %>;
+        --font-family: '<%= theme.fontFamily %>';
+        }
+    /* Image du cours */
+  .course-card .course-img {
+      border-bottom: 3px solid var(--primary-color);
+  }
+
+
+  /* Effet au survol */
+  .course-card:hover {
+      border: 2px solid var(--primary-color);
+  }
+
+  .course-card:hover .course-info h3,
+  .course-card:hover .course-info p {
+      color: var(--primary-color);
+  }
+    
+
+</style>
 <h1>Welcome, <%= user.username %></h1>
 <h2>All Courses</h2>
 

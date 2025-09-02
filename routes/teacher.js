@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
 const { Op } = require('sequelize');
+const logger = require('../config/logger');
 
 //const bcrypt = require('bcrypt');
 
@@ -48,14 +49,16 @@ router.get('/', async (req, res) => {
   try{
     console.log(req.session.user);
 
-    if(req.session.user.role ===  'teacher'){
+    if(req.session.user && req.session.user.role !==  'student'){
+      console.log('oh')
       res.redirect('/teacher/dash')
     }else{
-      res.redirect('/login')
+      console.log('ehla')
+      res.redirect('/teacher/login')
     }
 
   }catch{
-    res.status(500).json({ error: 'Erreur lors de la récupération des données professeur: ' + error });
+    res.status(500).json({ error: 'Erreur lors de la récupération des données professeur: '  });
   }
 
 
@@ -75,7 +78,7 @@ router.get('/dash', async (req, res) => {
     const teacher = await User.findOne({ where: { username } });
 
     console.log(teacher.role);
-    if (teacher && teacher.role === "teacher") {
+    if (teacher && teacher.role !== "student") {
       const courses = await Course.findAll({ where: { teacher: username },
                                              include: { model: User, as: 'students' }  });
 
@@ -107,7 +110,7 @@ router.get('/dash', async (req, res) => {
 
 router.get('/login',(req, res) => {
         res.render('loginTeacher');
-});
+})
 
 router.get('/register',(req, res) => {
     res.render('registerTeacher');
@@ -321,10 +324,14 @@ router.get('/courses/:courseId/submissions', async (req, res) => {
     }
 
     const subs = await Submission.findAll({
-      include: [{ model: Exercise }]  // sans where, sans required
+      include: [{ model: Exercise}]  // sans where, sans required
     });
     console.log('🔍 Submissions + include Exercise (no filter) :', subs.length);
-    console.log(subs[0].Exercise); 
+    if (subs.length > 0) {
+      console.log('First submission exercise:', subs[0].Exercise);
+    } else {
+      console.log('Aucune soumission trouvée.');
+    }
 
     // Récupère toutes les soumissions des exercices liés à ce cours
     const submissions = await Submission.findAll({

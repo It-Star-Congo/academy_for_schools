@@ -1,8 +1,9 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const { Course, ForumPost, User } = require('../models'); // Assure-toi que le chemin est correct
+const { Course, ForumPost, User, School, Class } = require('../models'); // Assure-toi que le chemin est correct
 const router = express.Router();
+const logger = require('../config/logger');
 
 // Configuration de Multer pour le stockage des images et fichiers
 const storage = multer.diskStorage({
@@ -21,8 +22,10 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Route pour afficher le formulaire
-router.get('/add', (req, res) => {
-    res.render('new-course');
+router.get('/add', async (req, res) => {
+
+  const classes = await Class.findAll({where : {schoolId: req.session.user.schoolId}})
+    res.render('new-course', {classes});
 });
 
 // Route pour recuperer tous les cours
@@ -237,6 +240,23 @@ router.get('/enrolled', async (req, res) => {
 });
 
 
+async function linkCourseToClass(courseId, classId) {
+  const classModel = await Class.findByPk(classId, {
+    include: [{ model: User, as: 'students' }]
+  });
+
+  if (!classModel) throw new Error("Classe introuvable");
+
+  // Lier le cours à la classe
+  await ClassCourse.create({ classId, courseId });
+
+  // Lier tous les élèves de cette classe au cours
+  for (const student of classModel.students) {
+    await student.addEnrolledCourse(courseId); // via relation M:N
+  }
+}
+
+
 
 
 // Route pour ajouter un cours
@@ -245,7 +265,7 @@ router.post('/add', upload.fields([
     { name: 'documents', maxCount: 10 } // Autorise jusqu'à 10 fichiers
 ]), async (req, res) => {
     try {
-        const { name, description, teacher, price, filesnames } = req.body;
+        const { name, description, teacher, price, classId, filesnames } = req.body;
         const imagePath = req.files.image ? `/uploads/images/${req.files.image[0].filename}` : null;
         
         // Stocke les fichiers sous forme de tableau
@@ -259,14 +279,18 @@ router.post('/add', upload.fields([
 
 
 
-        await Course.create({
+        const newCourse = await Course.create({
             name,
             description,
             teacher,
             price,
             image: imagePath,
-            documents: documentObjects
+            documents: documentObjects,
+            schoolId: req.session.user.schoolId
         });
+        if (classId) {
+          await linkCourseToClass(newCourse.id, classId);
+        }
 
         res.redirect('/dash'); // Redirige après ajout
     } catch (error) {

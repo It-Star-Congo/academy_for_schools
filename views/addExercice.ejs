@@ -20,6 +20,7 @@
         <select name="type" id="type" onchange="toggleFields()">
             <option value="vide">Choisir un type</option>
             <option value="qcm">QCM</option>
+            <option value="texte_trous">Texte à trous</option>
             <option value="programmation">Programmation</option>
             <option value="redaction">Rédaction</option>
         </select>
@@ -63,6 +64,15 @@
         <div id="essayFields" style="display:none;">
             <label for="evaluationCriteria">Critères d'évaluation (JSON) :</label>
             <textarea name="evaluationCriteria" id="evaluationCriteria" placeholder='{"clarté": 5, "argumentation": 5, "orthographe": 5}'></textarea>
+        </div>
+
+        <!-- Champs spécifiques au texte à trous -->
+        <div id="fillBlanksFields" style="display:none;">
+            <label for="textWithBlanks">Texte à trous :</label>
+            <textarea name="textWithBlanks" id="textWithBlanks" placeholder="Tapez le texte en remplaçant chaque trou par __"></textarea>
+
+            <label for="blanksAnswers">Réponses aux trous (JSON) :</label>
+            <textarea name="blanksAnswers" id="blanksAnswers" placeholder='["réponse1", "réponse2"]'></textarea>
         </div>
 
         <button type="submit" class="btne0">Ajouter</button>
@@ -119,6 +129,7 @@ function toggleFields() {
     document.getElementById('programmingFields').style.display = (type === 'programmation') ? 'block' : 'none';
     document.getElementById('qcmFields').style.display = (type === 'qcm') ? 'block' : 'none';
     document.getElementById('essayFields').style.display = (type === 'redaction') ? 'block' : 'none';
+    document.getElementById('fillBlanksFields').style.display  = (type === 'texte_trous') ? 'block' : 'none';
 }
 
 // Fonction pour ajouter une nouvelle question au QCM

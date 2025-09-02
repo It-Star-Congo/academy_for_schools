@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Gérer élèves – <%= cls.name %></title>
+  <style>
+    :root {
+      --primary-color:   <%= theme.primaryColor %>;
+      --secondary-color: <%= theme.secondaryColor %>;
+      --font-family:     '<%= theme.fontFamily %>';
+    }
+  </style>
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+  <header>
+    <h1>📋 Gérer élèves – <%= cls.name %></h1>
+    <a href="/admin/classes" class="btn-secondary">← Retour aux classes</a>
+  </header>
+
+  <main>
+    <form action="/admin/classes/<%= cls.id %>/students" method="POST">
+      <ul>
+        <% allStudents.forEach(student => { %>
+          <li>
+            <label>
+              <input
+                type="checkbox"
+                name="students"
+                value="<%= student.id %>"
+                <% if (cls.students.map(s => s.id).includes(student.id)) { %>checked<% } %>
+              >
+              <%= student.displayName || student.username %>
+            </label>
+          </li>
+        <% }) %>
+      </ul>
+      <button type="submit" class="btn-primary">Enregistrer</button>
+    </form>
+  </main>
+</body>
+</html>

@@ -116,23 +116,34 @@ router.post('/login',limiter,
       }
       
       // Si le mot de passe est correct, on crée une session pour l'utilisateur
-      req.session.user = { id: user.id, username: user.username, profile: user.profile || '/pictures/AcademyLogoTransparent-removebg-preview.png', email: user.contact, subscriptionType : "Free", credits: user.credits, role: user.role };
+      req.session.user = { id: user.id, username: user.username, classId: user.classId, profile: user.profile || '/pictures/AcademyLogoTransparent-removebg-preview.png', email: user.contact, subscriptionType : "Free", credits: user.credits, role: user.role, schoolId: user.schoolId };
       
       // Redirection vers le dashboard ou autre page
       // après un login réussi
-      
-
-      if (req.session.user.role === 'teacher'){
+      if(req.session.user.role === 'admin'){
         logger.log({
-        level:   'info',
-        message: `Connexion réussie pour teacher #${user.id}: ${user.username}`,
-        meta: {
-          category: 'auth',
-          ip:       req.ip,
-          method:   req.method,
-          url:      req.originalUrl
-        }
-      });
+          level:   'info',
+          message: `Connexion réussie pour admin #${user.id}: ${user.username}`,
+          meta: {
+            category: 'auth',
+            ip:       req.ip,
+            method:   req.method,
+            url:      req.originalUrl
+          }
+        });
+        res.redirect('/admin')
+
+      } else if (req.session.user.role === 'teacher'){
+        logger.log({
+          level:   'info',
+          message: `Connexion réussie pour teacher #${user.id}: ${user.username}`,
+          meta: {
+            category: 'auth',
+            ip:       req.ip,
+            method:   req.method,
+            url:      req.originalUrl
+          }
+        });
         res.redirect('/teacher/dash')
       }else{
         logger.log({
@@ -197,7 +208,7 @@ router.post('/register', upload.fields([
     // Vérifier si un utilisateur avec le même username ou contact existe déjà
     try {
         console.log(req.files); // Vérifier si l'image est bien reçue
-        const { username, contact, password, country, birthdate, firstname, name, offers, level } = req.body;
+        const { username, contact, password, country, birthdate, firstname, name, offers, level, classId } = req.body;
 
         const existingUser = await User.findOne({ 
             where: { 
@@ -230,7 +241,8 @@ router.post('/register', upload.fields([
             name, 
             offers, 
             level,
-            abonnement : "academic"
+            abonnement : "academic",
+            classId
         });
 
         logger.log({
@@ -245,7 +257,7 @@ router.post('/register', upload.fields([
       });
 
         req.flash('messages', ['Inscription réussie ! Vous pouvez vous connecter maintenant.']);
-        req.session.user = { id: user.id, username: user.username, profile: imagePath, email: user.contact, credits: user.credits, abonnement : "Basic", role: user.role };
+        req.session.user = { id: user.id, username: user.username, classId, profile: imagePath, email: user.contact, credits: user.credits, abonnement : "Basic", role: user.role };
         console.log("ok1")
 
         /*req.login(user, err =>

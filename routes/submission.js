@@ -281,7 +281,23 @@ if __name__ == "__main__":
         } else if (type === "redaction") {
             score = Math.floor(Math.random() * 100); // Simulation d'une correction
             success = score >= 50;
+        } else if (type === 'texte_trous') {
+            const expected = exercise.blanksAnswers;             // Tableau des réponses attendues
+            let correctCount = 0;
+            const blanksResults = expected.map((exp, idx) => {
+                const userAns = answers[`blank-${idx}`];           // Récupérer la réponse utilisateur
+                const isCorrect =
+                userAns && userAns.trim().toLowerCase() === exp.trim().toLowerCase();
+                if (isCorrect) correctCount++;
+                return { index: idx, expected: exp, userAnswer: userAns, isCorrect };
+            });
+
+            score   = (correctCount / expected.length) * 100;
+            success = score === 100;
+            results.push({ success, message: `Vous avez ${correctCount} bonnes réponses sur ${expected.length} mots !` });
+            data    = blanksResults; 
         }
+
 
         await Submission.create({
             code: code || null,

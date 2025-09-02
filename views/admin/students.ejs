@@ -1,0 +1,32 @@
+
+<h1>Élèves</h1>
+<a href="/admin/students/new">+ Nouvel élève</a>
+<table>
+  <tr><th>ID</th><th>Nom</th><th>Username</th><th>Actions</th></tr>
+  <% students.forEach(s => { %>
+    <tr>
+      <td><%= s.id %></td>
+      <td><%= s.displayName %></td>
+      <td><%= s.username %></td>
+      <td>
+        <a href="/dash/profile/<%= s.id %>/show">✎</a>
+        <button onclick="deleteItem('/admin/students/<%= s.id %>')">🗑️</button>
+      </td>
+    </tr>
+  <% }) %>
+</table>
+<script>
+function deleteItem(url) {
+  if(!confirm('Confirmer suppression ?')) return;
+  fetch(url,{ method:'DELETE' })
+    .then(r=>r.json()).then(() => location.reload());
+}
+</script>
+<style>
+  :root {
+        --primary-color: <%= theme.primaryColor %>;
+        --secondary-color: <%= theme.secondaryColor %>;
+        --font-family: '<%= theme.fontFamily %>';
+        }
+</style>
+

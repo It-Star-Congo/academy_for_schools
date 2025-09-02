@@ -9,6 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 require('dotenv').config();
+console.log(process.env.OPENAI_API_KEY);
 const helmet            = require('helmet');
 //const csrf              = require('csurf');
 //const passport          = require('passport');
@@ -16,6 +17,7 @@ const helmet            = require('helmet');
 
 const logger         = require('./config/logger');
 const requestLogger  = require('./middlewares/requestLogger');
+const themeLoader = require('./middlewares/themeLoader');
 
 
 // Middleware
@@ -25,6 +27,7 @@ app.set('views', path.join(__dirname, '/views'));
 app.use(express.static(path.join(__dirname, 'public')));
 // Utilise express-ejs-layouts pour gérer les mises en page
 app.use(expressLayouts);
+
 
 
 /*app.use(helmet({
@@ -85,6 +88,7 @@ app.use('/uploads', express.static('public/uploads'));
 
 
 app.use(requestLogger); 
+app.use(themeLoader);
 
 /* Sessions + Passport
 configurePassport(passport);
@@ -114,7 +118,7 @@ const exerciseRoutes = require('./routes/exercice');
 const submissionRoutes = require('./routes/submission');
 const teacherRoutes = require('./routes/teacher');
 const adminRoutes = require('./routes/admin');
-
+const chatRoutes = require('./routes/chat');
 
 
 
@@ -122,7 +126,7 @@ app.get('/', (req, res) => {
     res.render('index');
   });
 
-  
+app.use('/chat', chatRoutes);
 app.use('/users', userRoutes);
 app.use('/auth', authRoutes);
 app.use('/dash', dashboardRoutes);

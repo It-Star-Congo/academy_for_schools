@@ -23,6 +23,17 @@
         </div>
 
         <div class="form-group">
+            <label for="classId">Classe associée :</label>
+            
+            <select name="course" id="course" required>
+            <option value="">Sélectionner une classe</option>
+            <% classes.forEach(classe => { %>
+                <option value="<%= classe.id %>"><%= classe.name %></option>
+            <% }); %>
+            </select>
+        </div>
+
+        <div class="form-group">
             <label for="image">Image du cours :</label>
             <input type="file" id="image" name="image" accept="image/*">
         </div>

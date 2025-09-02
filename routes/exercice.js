@@ -4,6 +4,7 @@ const { Exercise } = require('../models');
 const { Course } = require('../models'); // Importation du modèle Course
 const { User } = require('../models')
 const { Submission } = require('../models');
+const logger = require('../config/logger');
 
 async function getCoursesByTeacher(username) {
   try {
@@ -186,13 +187,23 @@ router.post('/add', async (req, res) => {
       exerciseData = { ...exerciseData, evaluationCriteria: JSON.parse(evaluationCriteria) };
       console.log("Critères d'évaluation:", evaluationCriteria);
     }
+    else if (type === 'texte_trous') {
+      const { textWithBlanks, blanksAnswers } = req.body;
+      exerciseData = {
+        ...exerciseData,
+        textWithBlanks,
+        blanksAnswers: blanksAnswers ? JSON.parse(blanksAnswers) : null
+      };
+      console.log("Texte à trous :", textWithBlanks);
+      console.log("Réponses attendues :", blanksAnswers);
+    }
 
     console.log('ok2');
 
     let exoo = await Exercise.create(exerciseData);
     logger.log({
               level:   'info',
-              message: `Teacher ${user.id}: ${user.name} a créé l'exercice ${exoo.id}`,
+              message: `Teacher ${req.session.user.id}: ${req.session.user.name} a créé l'exercice ${exoo.id}`,
               meta: {
                 category: 'interaction',
                 ip:       req.ip,

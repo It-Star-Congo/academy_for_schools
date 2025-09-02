@@ -24,6 +24,19 @@ module.exports = (sequelize) => {
     evaluationCriteria: { 
       type: DataTypes.JSON, // Ex: { "clarté": 5, "argumentation": 5, "orthographe": 5 }
       allowNull: true 
+    },
+    // Champs pour « texte à trous »
+    textWithBlanks: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    blanksAnswers: {
+      type: DataTypes.JSON,
+      allowNull: true
+    },
+    linktofile: { 
+      type: DataTypes.STRING, // Stocke l'URL ou le chemin vers le devoir
+      allowNull: true 
     }
   });
 

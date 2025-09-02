@@ -1,0 +1,306 @@
+
+
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+  <div class="bg-white p-8 rounded-xl shadow-xl w-full max-w-lg">
+    <h2 class="text-3xl font-bold text-center mb-6">Inscription Professeur</h2>
+
+    
+    <form action="/admin/register" method="POST" enctype="multipart/form-data">
+      <section class="identity">
+
+        <h4>1. Données personnelles</h4></br></br>
+
+        <div class="mb-4">
+          <label for="firstname">Prénom :  *</label>
+          <input type="text" name="firstname" id="firstname" required  required class="w-full p-3 mt-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Prénom" /></br></br>
+        </div>
+        
+        <div class="mb-4">
+          <label for="name" class="block text-sm font-semibold text-gray-700">Nom *</label>
+          <input type="text" name="name" id="name" required class="w-full p-3 mt-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nom" /></br></br>
+        </div>
+
+        <div class="mb-4">
+          <label for="email" class="block text-sm font-semibold text-gray-700">Adresse Email *</label>
+          <input type="email" name="email" id="email" required class="w-full p-3 mt-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Email" /></br></br>
+        </div>
+
+        <div class="mb-4">
+          <label for="password" class="block text-sm font-semibold text-gray-700">Mot de Passe *</label>
+          <input type="password" name="password" id="password" required class="w-full p-3 mt-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Mot de Passe" /></br></br>
+        </div>
+
+        <div class="mb-4">
+          <label for="birthdate">Date de naissance :  *</label>
+          <input type="date" name="birthdate" required /></br></br>
+        </div>
+
+        <label>D'où venez vous ? (Choisissez votre pays) </label>
+        <select class="mboka" id="countrySelect" name="country"></select></br></br></br>
+
+        <label for="level">Quel est votre plus haut grade d'enseignement ?</label>
+        <select class="plomdi" id="level" name="level">
+            <option value="">Sélectionnez un niveau</option>
+            <option value="primaire">Primaire</option>
+            <option value="college">Collège (Secondaire 1er cycle / Cycle d'orientation)</option>
+            <option value="lycee">Lycée (Secondaire 2e cycle / Humanités)</option>
+            <option value="professionnel">Enseignement professionnel ou technique</option>
+            <option value="bachelier">Université (Licence / Bachelor)</option>
+            <option value="master">Master</option>
+            <option value="doctorat">Doctorat</option>
+            <option value="aucun">Aucun diplôme</option>
+        </select>
+        </br></br></br>
+      </section>
+
+      <section class="identity">
+
+        <h4>2. Informations du compte</h4></br></br>
+
+        <div class="mb-4">
+        <label for="username">Nom d'utilisateur :  *</label>
+        <input type="text" name="username" placeholder="Nom d'utilisateur (Ex: Jojo_243)" required />
+      </div>
+
+      <div class="mb-4">
+        <label for="image">Choisir une photo de profil :</label>
+        <input type="file" id="profile" name="profile" accept="image/*">
+      </div>
+
+      <div class="mb-4">
+        <label for="cv" class="block text-sm font-semibold text-gray-700">Télécharger votre CV</label>
+        <input type="file" name="cv" id="cv" accept=".pdf,.doc,.docx" required class="w-full p-3 mt-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+
+      <div class="mb-6">
+        <label for="bio" class="block text-sm font-semibold text-gray-700">Ecrivez votre bio, Pourquoi pensez-vous être un bon professeur ?</label>
+        <textarea name="bio" id="bio" required class="w-full p-3 mt-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" rows="4" placeholder="Expliquez vos motivations"></textarea>
+      </div>
+
+      <div class="mb-6">
+        <label for="courses" class="block text-sm font-semibold text-gray-700">Quels cours souhaitez-vous enseigner ?</label>
+        <textarea name="courses" id="courses" required class="w-full p-3 mt-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" rows="4" placeholder="Liste des cours à enseigner"></textarea>
+      </div>
+    </section>
+
+    <section class="identity">
+      <h4>3. Confidentialité et Consentement</h4><br><br>
+      <label>
+          <input type="checkbox" name="privacy" required>
+          J'accepte les <a href="/dashboard/confidence" class="check">règles de confidentialité</a> et la <a href="/dashboard/confidence" class="check">politique du site </a>. (Cliquez sur les liens pour accéder) *
+      </label></br>
+      <label>
+          <input type="checkbox" name="offers">
+          Je souhaite recevoir des bons plans, des avantages et des offres exclusives par mail.
+      </label></br></br>
+    </section>
+
+      <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700">S'inscrire</button>
+
+      <div class="text-center mt-4">
+        <span class="text-sm text-gray-600">Vous avez déjà un compte ? </span><a href="/teacher/login" class="text-blue-600 font-semibold">Se Connecter</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+    /* Global styling for the form */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f7fafc; /* Light background color */
+    }
+  
+    h2 {
+      color: #1a202c;
+    }
+  
+    label {
+      font-size: 0.875rem;
+      color: #4a5568; /* Slightly lighter text color */
+    }
+  
+    input, textarea {
+      border: 1px solid #e2e8f0; /* Light border color */
+      border-radius: 0.75rem; /* Rounded corners */
+      padding: 0.75rem; /* Add padding to inputs */
+      transition: all 0.3s ease; /* Smooth transition for focus */
+    }
+  
+    input:focus, textarea:focus {
+      border-color: #3182ce; /* Blue color on focus */
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.4); /* Light blue glow */
+      outline: none; /* Remove default focus outline */
+    }
+  
+    input[type="file"] {
+      display: inline-block;
+      padding: 0.5rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.75rem;
+      background-color: #f7fafc;
+      transition: all 0.3s ease;
+    }
+  
+    input[type="file"]:focus {
+      border-color: #3182ce;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.4);
+    }
+  
+    button {
+      background-color: #3182ce; /* Blue color */
+      color: white;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      width: 100%;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+  
+    button:hover {
+      background-color: #2b6cb0; /* Darker blue on hover */
+    }
+  
+    button:focus {
+      outline: none;
+    }
+  
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+  
+    .mb-4 {
+      margin-bottom: 1rem; /* Ensure consistent spacing */
+    }
+  
+    .mb-6 {
+      margin-bottom: 1.5rem;
+    }
+  
+    .text-center {
+      text-align: center;
+    }
+  
+    .text-sm {
+      font-size: 0.875rem;
+    }
+  
+    .text-gray-700 {
+      color: #4a5568;
+    }
+  
+    .text-blue-600 {
+      color: #3182ce;
+    }
+  
+    .text-blue-600:hover {
+      color: #2b6cb0;
+    }
+  
+    .bg-white {
+      background-color: #ffffff; /* White background for form box */
+    }
+  
+    .max-w-lg {
+      max-width: 32rem; /* Set a max-width for the form box */
+    }
+  
+    .shadow-xl {
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+  
+    .rounded-xl {
+      border-radius: 1rem; /* Rounded corners */
+    }
+  
+    .bg-gray-100 {
+      background-color: #f7fafc; /* Light gray background */
+    }
+  
+    .p-8 {
+      padding: 2rem; /* Padding around the form */
+    }
+  
+    .mt-2 {
+      margin-top: 0.5rem;
+    }
+  
+    .mt-4 {
+      margin-top: 1rem;
+    }
+  
+    .hover\:bg-blue-700:hover {
+      background-color: #2b6cb0;
+    }
+  
+    @media (max-width: 640px) {
+      .max-w-lg {
+        max-width: 100%; /* Full width on small screens */
+      }
+    }
+  </style>
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+
+    <script> 
+    
+
+    $(document).ready(function() {
+        // Charge tous les pays depuis l'API restcountries.com
+        $.ajax({
+            url: "https://restcountries.com/v3.1/all",
+            dataType: "json",
+            success: function(data) {
+                const countries = $.map(data, function(country) {
+                    const nomFrancais = country.translations.fra.common;
+                    return {
+                        id: country.name.common,
+                        text: nomFrancais,
+                        code: country.cca2
+                    };
+                });
+
+                // Initialise Select2
+                $("#countrySelect").select2({
+                    data: countries,
+                    matcher: function(params, data) {
+                        if ($.trim(params.term) === '') {
+                            return data;
+                        }
+
+                        if (data.text.toUpperCase().indexOf(params.term.toUpperCase()) > -1) {
+                            return data;
+                        }
+
+                        return null;
+                    }
+                });
+
+                // Obtient la localisation par adresse IP
+                $.ajax({
+                    url: "http://ip-api.com/json",
+                    dataType: "json",
+                    success: function(location) {
+                        if (location.country) {
+                            const pays = location.country;
+                            // Sélectionne le pays dans Select2
+                            const paysTrouve = countries.find(country => country.text === pays);
+                            if (paysTrouve) {
+                                $("#countrySelect").val(paysTrouve.id).trigger("change");
+                            }
+                        }
+                    },
+                    error: function() {
+                        console.error("Erreur de géolocalisation par adresse IP.");
+                    }
+                });
+            }
+        });
+    });
+    </script> 

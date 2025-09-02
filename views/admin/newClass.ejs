@@ -1,0 +1,24 @@
+<style>
+    :root {
+      --primary-color:   <%= theme.primaryColor %>;
+      --secondary-color: <%= theme.secondaryColor %>;
+      --font-family:     '<%= theme.fontFamily %>';
+    }
+  </style>
+  <header>
+    <img id="site-logo" src="<%= theme.logo %>" alt="Logo <%= theme.title %>">
+    <h1><%= theme.title %> — Créer une classe</h1>
+  </header>
+
+  <main>
+    <form action="/admin/classes/create" method="POST">
+      <div>
+        <label for="name">Nom de la classe :</label>
+        <input type="text" id="name" name="name" required>
+      </div>
+
+      <!-- Ajoutez ici d’autres champs si besoin (description, niveau, etc.) -->
+      
+      <button type="submit">Créer</button>
+    </form>
+  </main>

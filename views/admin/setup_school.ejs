@@ -1,0 +1,194 @@
+<style>/* Variables de couleurs */
+:root {
+  --bg-page: #f4f6f8;
+  --bg-card: #ffffff;
+  --text-primary: #2c3e50;
+  --text-secondary: #7f8c8d;
+  --accent: #3498db;
+  --accent-dark: #2980b9;
+  --border: #dce1e6;
+  --shadow: rgba(0, 0, 0, 0.05);
+}
+
+/* Conteneur principal */
+.container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: var(--bg-card);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+/* Titre */
+.container h2 {
+  font-size: 1.75rem;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Formulaire */
+form {
+  display: grid;
+  grid-gap: 1.5rem;
+}
+
+/* Groupe de champs */
+form > div {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Labels */
+form label {
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+/* Champs de saisie */
+form input[type="text"],
+form input[type="email"],
+form input[type="color"],
+form input[type="file"],
+form textarea {
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background-color: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+form input[type="color"] {
+  padding: 0;
+  height: 2.5rem;
+}
+
+form textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+/* Effet focus */
+form input:focus,
+form textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+/* Grille pour deux colonnes */
+.grid-cols-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Bouton */
+form button[type="submit"] {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: var(--accent);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+/* Hover et active */
+form button[type="submit"]:hover {
+  background-color: var(--accent-dark);
+}
+
+form button[type="submit"]:active {
+  transform: scale(0.98);
+}
+
+/* Messages d’erreur / succès */
+.form-message {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.form-message.error {
+  background-color: #fdecea;
+  color: #e74c3c;
+  border: 1px solid #e6b0aa;
+}
+
+.form-message.success {
+  background-color: #e9f7ef;
+  color: #27ae60;
+  border: 1px solid #a9dfbf;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .container {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+}
+</style>
+<div class="container mx-auto p-6">
+  <h2 class="text-2xl font-bold mb-4">Configuration de votre École</h2>
+
+  
+
+  <form action="<%= action %>" method="POST" enctype="multipart/form-data" class="space-y-6">
+    <div>
+      <label for="name" class="block font-semibold">Nom de l'école *</label>
+      <input type="text" name="name" id="name" required
+        class="w-full border p-2 rounded" placeholder="Ex. Lycée François" />
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block font-semibold">Couleur primaire</label>
+        <input type="color" name="primaryColor" value="#3182ce" class="w-full h-10 p-0 border-0" />
+      </div>
+      <div>
+        <label class="block font-semibold">Couleur secondaire</label>
+        <input type="color" name="secondaryColor" value="#2b6cb0" class="w-full h-10 p-0 border-0" />
+      </div>
+    </div>
+
+    <div>
+      <label class="block font-semibold">Logo de l'école</label>
+      <input type="file" name="logo" accept="image/*" class="block" />
+    </div>
+
+    <div>
+      <label class="block font-semibold">Email de contact</label>
+      <input type="email" name="contactEmail" class="w-full border p-2 rounded" />
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block font-semibold">Téléphone</label>
+        <input type="text" name="contactPhone" class="w-full border p-2 rounded" />
+      </div>
+      <div>
+        <label class="block font-semibold">Adresse</label>
+        <input type="text" name="contactAddress" class="w-full border p-2 rounded" />
+      </div>
+    </div>
+
+    <button type="submit"
+       class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+      Enregistrer l’École
+    </button>
+  </form>
+</div>
+
+

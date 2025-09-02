@@ -3,28 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academy</title>
-    <link rel="icon" type="image/x-icon" href="/pictures/AcademyLogoTransparent-removebg-preview.png">
+    <title><%= theme.title %></title>
+    <link rel="icon" type="image/x-icon" href="<%= theme.logo %>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet"  type="text/css" href="/styles.css">
+    <style>
+        :root {
+        --primary-color: <%= theme.primaryColor %>;
+        --secondary-color: <%= theme.secondaryColor %>;
+        --font-family: '<%= theme.fontFamily %>';
+        }
+        .navbar{
+            background-color: var(--primary-color);
+        }
+        .btn2{
+            background-color: var(--primary-color);
+        }
+        .nav-links2 a:hover{
+            color: var(--primary-color);
+        }
+    </style>
 </head>
+
 <body>
     <nav class="navbar">
         <div class="logo">
-            <img src="/pictures/AcademyLogoTransparent.png" alt="Logo" class="logo-img">
-            Academy
+            <img src="<%= theme.logo %>" alt="Logo" class="logo-img">
+            <%= theme.title %>
         </div>
         <ul class="nav-links">
             <li><a href="/dash">Tableau de bord</a></li>
             <li><a href="/courses/myCourses">Mes cours</a></li>
             <li><a href="/dash/profile3"><%= user ? user.username : "profil" %> </a></li>
             <li><a href="/auth/logout"><%= user ? "Déconnexion" : "Connexion" %> </a></li>
-            <li class="apartes"><a href="/teacher">Teacher Side</a></div></li>
+            
         </ul>
     </nav>
     <div class="content">
         <%- body %>
     </div>
+    <footer>
+        <ul class="nav-links2">
+            <li><a href="/teacher">Teacher Side</a></li>
+            <li><a href="/admin">Admin-side</a></li>
+            <li><a href="/auth/logout">Inscrire mon école</a></li>
+            <li><a href="/courses/myCourses">Qui nous sommes</a></li>
+            <li><a href="/dash/privacy">Politique de confidentialité </a></li>
+        </ul>
+    </footer>
+    <%- include('chat/chat') %>
 </body>
 
 
