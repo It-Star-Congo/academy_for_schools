@@ -3,7 +3,7 @@ const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = new Sequelize({
   dialect: 'sqlite',
   //storage: './database.sqlite3',
-  storage: './productiontest5.sqlite3',
+  storage: './productiontest8.sqlite3',
   logging: false
 });
 
@@ -16,6 +16,8 @@ const ForumPost = require('./forumPost')(sequelize);
 const Class = require('./class')(sequelize);
 const ClassCourse = require('./classCourse')(sequelize);
 const School     = require('./school')(sequelize);
+// ✅ AJOUTE : Event
+const Event      = require('./event')(sequelize);
 
 
 
@@ -34,7 +36,7 @@ Submission.belongsTo(User);
 
 Exercise.hasMany(Submission, { onDelete: 'CASCADE' });
 Submission.belongsTo(Exercise, {
-  foreignKey: 'exerciseId'
+  //foreignKey: 'exerciseId'
   // pas de `as:` ici → Sequelize utilisera le nom du modèle, c.-à-d. "Exercise"
 });
 
@@ -56,6 +58,7 @@ ForumPost.belongsTo(ForumPost, { as: 'parent', foreignKey: 'parentId' });
 User.associate({ Course, Class, School });
 Course.associate({ User, Exercise, Class, School });
 Class.associate({ User, Course, School });
+Event.associate({ User, School });
 
 Class.belongsToMany(Course, { through: ClassCourse, foreignKey: 'classId', otherKey: 'courseId' });
 Course.belongsToMany(Class, { through: ClassCourse, foreignKey: 'courseId', otherKey: 'classId' });
@@ -83,4 +86,4 @@ const syncDB = async () => {
   }
 };
 
-module.exports = { sequelize, syncDB, User, Course, Exercise, Submission, ForumPost, Class, ClassCourse, School };
+module.exports = { sequelize, syncDB, User, Course, Exercise, Submission, ForumPost, Class, ClassCourse, School, Event };

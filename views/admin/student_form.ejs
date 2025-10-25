@@ -1,17 +1,20 @@
 <h1><%= user.id ? 'Modifier élève' : 'Nouvel élève' %></h1>
 <form action="<%= action %>" method="POST" enctype="multipart/form-data">
-  <label>Nom complet<input name="name" value="<%= user.name||'' %>" required></label>
+  <label>Nom complet</label>
+  <input name="name" value="<%= user.name||'' %>" required/>
   <label for="firstname">Prénom :  *</label>
   <input type="text" name="firstname" placeholder="Prénom" required />
-  <label>Identifiant<input name="username" value="<%= user.username||'' %>" required></label>
+  <label>Identifiant</label>
+  <input name="username" value="<%= user.username||'' %>" required/>
   <label for="birthdate">Date de naissance :  *</label>
   <input type="date" name="birthdate" required /></br></br>
   <label for="contact">Email/Telephone :  *</label>
   <input type="text" name="contact" placeholder="Email/Telephone" /> </br></br>
   <label for="image">Choisir une photo de profil :</label>
   <input type="file" id="image" name="image" accept="image/*"></br>
-  <label>Mot de passe<input type="password" name="password" <%= user.id?'':'required' %> ></label>
-  <label>Role<input name="role" value="<%= user.role||'' %>"  required></label>
+  <label for="password">Mot de passe </label>
+  <input type="password" name="password" id="password" required>
+  <label for="role">Role<input name="role" value="<%= user.role||'' %>"  required></label>
   <label>Classe associée :  <select name="classId" id="classId" required>
             <option value="">Sélectionner une classe</option>
             <% classes.forEach(classe => { %>

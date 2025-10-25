@@ -22,20 +22,32 @@
         .nav-links2 a:hover{
             color: var(--primary-color);
         }
+        a{
+            text-decoration: none;
+        }
+        
     </style>
 </head>
 
 <body>
     <nav class="navbar">
+        <a href="/dash" class="logo">
         <div class="logo">
             <img src="<%= theme.logo %>" alt="Logo" class="logo-img">
             <%= theme.title %>
-        </div>
+        </div></a>
         <ul class="nav-links">
             <li><a href="/dash">Tableau de bord</a></li>
             <li><a href="/courses/myCourses">Mes cours</a></li>
             <li><a href="/dash/profile3"><%= user ? user.username : "profil" %> </a></li>
-            <li><a href="/auth/logout"><%= user ? "Déconnexion" : "Connexion" %> </a></li>
+            <% if (user && user.abonnement !== 'free') { %>
+            <li><a href="/admin/calendar">Calendrier </a></li>
+            <% }%>
+            <li>
+                <form action="/auth/logout" method="post" style="display:inline">
+                    <button type="submit" class="link-buttone"><%= user ? "Déconnexion" : "Connexion" %></button>
+                </form>
+            </li>
             
         </ul>
     </nav>
@@ -51,7 +63,9 @@
             <li><a href="/dash/privacy">Politique de confidentialité </a></li>
         </ul>
     </footer>
+    <% if (user && user.abonnement !== 'free') { %>
     <%- include('chat/chat') %>
+    <% }%>
 </body>
 
 

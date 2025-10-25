@@ -8,18 +8,18 @@
     <div class="abonnement-container">
         <form id="abonnement-form" action="/auth/submit-abonnement" method="POST">
             <input type="hidden" name="abonnement" id="abonnement-hidden" value="basic">
-            <div class="abonnement-card" data-abonnement="basic">
-                <h3>Basic (Gratuit) ;;;</h3>
-                <p>Accès à une sélection limitée de cours.</p>
+            <!--<div class="abonnement-card" data-abonnement="basic">
+                <h3>Free (Student Only) </h3>
+                <p>Le savoir est une arme.</p>
                 <ul>
                     <li>Cours gratuits</li>
                     <li>Exercices gratuits</li>
                     <li>Accès limité aux ressources</li>
                 </ul>
                 <p class="price"><span>Gratuit</span></p>
-            </div>
-            <div class="abonnement-card" data-abonnement="premium">
-                <h3>Premium</h3>
+            </div>-->
+            <!--<div class="abonnement-card" data-abonnement="premium">
+                <h3> Learn (Student Only) </h3>
                 <p>Accès à une large bibliothèque de cours et fonctionnalités avancées.</p>
                 <ul>
                     <li>Cours gratuits</li>
@@ -31,25 +31,56 @@
                     <li class="highlighted">Accès aux forums de discussion</li>
                 </ul>
                 <p class="price"><span>$5.99</span></p>
+            </div>-->
+            <div class="abonnement-card" data-abonnement="pro">
+                <h3>Pro (Créateur)</h3>
+                <p>Pour professeurs, formateurs, écoles en test</p>
+                <ul>
+                    <li >Jusqu'à 5 cours</li>
+                    <li class="highlighted">Tableau de bord enseignant complet</li>
+                    <li class="highlighted">Outils de statistiques</li>
+                    <li class="highlighted">Certificats de fin de formation</li>
+                    <li class="highlighted">Support avancé</li>
+                </ul>
+                <p class="price"><span>$11.99</span></p>
+                
             </div>
+
+            <div class="abonnement-card" data-abonnement="school">
+                <h3>School (Institutionnel)</h3>
+                <p>Pour écoles, universités, ONG, ministères, etc.</p>
+                <ul>
+                    <li >Jusqu'à 1000 membres (profs et étudiants)</li>
+                    <li class="highlighted">Branding complet (logo, couleurs, domaine personnalisé)</li>
+                    <li class="highlighted">Sous-domaine personnalisé (ex: ecole.itstaracademy.com)</li>
+                    <li class="highlighted">Création illimitée de cours et exercices</li>
+                    <li class="highlighted">Tableau de bord administrateur complet</li>
+                    <li class="highlighted">Accès aux forums de discussion</li>
+                    <li class="highlighted">Calendrier Academique </li>
+                    <li class="highlighted">Reunions audios/videos  </li>
+                    <!--<li class="highlighted">Assistance aux exercices avec ITSA IA </li>-->
+                    <!--<li class="highlighted">Notifications par mail</li>-->
+                    <li class="highlighted">Support prioritaire</li>
+                </ul>
+                <p class="price"><span>$89.99</span></p>
+                
+            </div>
+
             <div class="abonnement-card" data-abonnement="unlimited">
                 <h3>Unlimited</h3>
                 <p>Accès illimité à tous les cours et avantages exclusifs.</p>
                 <ul>
-                    <li >Téléchargement des cours</li>
-                    <li >Accès aux forums de discussion</li>
-                    <li >20 crédits par mois</li>
-                    <li class="highlighted">Accès illimité à tous les cours</li>
-                    <li class="highlighted">Accès illimité à tous les exercices</li>
-                    <li class="highlighted">Certificats de fin de formation</li>
-                    <li class="highlighted">Coachings personnalisés</li>
-                    <li class="highlighted">Accès aux cours en avant-première</li>
+                    </li>
+                    <li class="highlighted" >Nombre illimité de membres (profs et éleves)
+                    <li class="highlighted">ITSA IA : Suivi étudiants + Recommandations</li>
+                    <li class="highlighted">Assistance aux exercices avec ITSA IA </li>
+                    <li class="highlighted">Tous les avantages de l'abonnement School</li>
                     <li class="highlighted">Support prioritaire</li>
                 </ul>
-                <p class="price"><span>$9.99</span></p>
+                <p class="price"><span>$259.99</span></p>
                 
             </div>
-            <button class="abonnement-done" type="submit"></button>>Continuer</button>
+            <button class="abonnement-done" type="submit">Continuer</button>
         </form>
     </div></br></br>
     
@@ -73,15 +104,17 @@
             border: none;
         }
 
-        .abonnement-container {
+        .abonnement-container form{
             min-height: 50vh;
             margin: 0;
             font-family: sans-serif;
             display: flex;
-            gap: 20px;
             justify-content: center;
-            align-items: stretch;
-            
+            flex-direction: row;
+            flex-wrap: nowrap;        /* <-- Empêche le retour à la ligne */
+            gap: 20px;                /* Espace entre les cartes */
+            justify-content: center;  /* Centre horizontalement */
+            align-items: flex-start;  
         }
 
         .abonnement-card {
@@ -183,20 +216,28 @@
         }
     </style>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.abonnement-card');
-            const hiddenInput = document.getElementById('abonnement-hidden');
+      document.addEventListener('DOMContentLoaded', () => {
+        const cards = document.querySelectorAll('.abonnement-card');
+        const hiddenInput = document.getElementById('abonnement-hidden');
 
-            cards.forEach(card => {
-                card.addEventListener('click', () => {
-                    cards.forEach(c => c.classList.remove('selected'));
-                    card.classList.add('selected');
-                    hiddenInput.value = card.getAttribute('data-abonnement'); // Mettez à jour la valeur
-                });
-            });
+        cards.forEach(card => {
+        card.addEventListener('click', () => {
+            // Retire la sélection précédente
+            cards.forEach(c => c.classList.remove('selected'));
 
-            // Sélectionne l'abonnement Basic par défaut
-            cards[0].classList.add('selected');
+            // Marque la carte actuelle
+            card.classList.add('selected');
+
+            // Met à jour la valeur cachée
+            hiddenInput.value = card.dataset.abonnement;
         });
+      });
+
+      // Valeur par défaut (première carte visible)
+      if (cards.length > 0) {
+        cards[0].classList.add('selected');
+        hiddenInput.value = cards[0].dataset.abonnement;
+      }
+    });
     </script>
 </body>

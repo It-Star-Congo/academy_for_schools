@@ -147,6 +147,9 @@ router.post('/login', async (req, res) => {
       profile: user.profile || null, 
       email: user.contact, 
       role: user.role, 
+      subscriptionType : user.abonnement, 
+      abonnement:user.abonnement,
+      schoolId: user.schoolId
     };
     
     logger.log({
@@ -207,7 +210,8 @@ router.post('/register',
         birthdate,
         offers,
         level,
-        abonnement: "Basic"
+        abonnement: "pro",
+        schoolId: 1
       });
 
       req.session.user = {
@@ -215,7 +219,10 @@ router.post('/register',
         username: user.username,
         profile: user.profile,
         contact: user.email,
-        role: user.role
+        subscriptionType : user.abonnement, 
+        role: user.role,
+        abonnement:user.abonnement,
+        schoolId: user.schoolId
       };
 
       res.redirect('/teacher/dash');
@@ -326,26 +333,27 @@ router.get('/courses/:courseId/submissions', async (req, res) => {
     const subs = await Submission.findAll({
       include: [{ model: Exercise}]  // sans where, sans required
     });
-    console.log('🔍 Submissions + include Exercise (no filter) :', subs.length);
+
     if (subs.length > 0) {
       console.log('First submission exercise:', subs[0].Exercise);
     } else {
       console.log('Aucune soumission trouvée.');
     }
+    console.log('🔍 Submissions + include Exercise (no filter) :', subs.length);
 
     // Récupère toutes les soumissions des exercices liés à ce cours
     const submissions = await Submission.findAll({
       include: [
         {
           model: Exercise,
-          where: { CourseId: courseId },
-          attributes: ['id', 'title'],
-          required: true      // force l’INNER JOIN pour ne renvoyer que les bonnes
+          where: { course: course.name },
+          //attributes: ['id', 'title'],
+          //required: true      // force l’INNER JOIN pour ne renvoyer que les bonnes
         },
         {
           model: User,
-          attributes: ['id', 'username', 'contact'],
-          required: true
+          attributes: ['id', 'username']//,
+          //required: true
         }
       ],
       order: [['createdAt', 'DESC']]

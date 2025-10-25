@@ -96,6 +96,7 @@ router.get('/profile/:studentId/show', isAuthenticated, async (req, res) => {
     // Calcule le pourcentage de progression pour chaque cours
     const coursesWithProgress = user.enrolledCourses.map(course => {
       const scores = [];
+      try{
       course.Exercises.forEach(ex => {
         ex.Submissions.forEach(s => scores.push(s.score));
       });
@@ -103,6 +104,9 @@ router.get('/profile/:studentId/show', isAuthenticated, async (req, res) => {
       const count = scores.length;
       const progress = count ? Math.round(total / count) : 0;
       return { ...course.toJSON(), progress };
+    } catch(e){
+      return { ...course.toJSON(), e};
+    }
     });
 
         /* Simuler des cours avec progression (dans une vraie app, récupère depuis la BD)

@@ -2,7 +2,7 @@
 
 <div class="flex items-center justify-center min-h-screen bg-gray-100">
   <div class="bg-white p-8 rounded-xl shadow-xl w-full max-w-lg">
-    <h2 class="text-3xl font-bold text-center mb-6">Inscription Professeur</h2>
+    <h2 class="text-3xl font-bold text-center mb-6">Inscription Administrateur</h2>
 
     
     <form action="/admin/register" method="POST" enctype="multipart/form-data">
@@ -23,6 +23,11 @@
         <div class="mb-4">
           <label for="email" class="block text-sm font-semibold text-gray-700">Adresse Email *</label>
           <input type="email" name="email" id="email" required class="w-full p-3 mt-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Email" /></br></br>
+        </div>
+
+        <div class="mb-4">
+          <label for="tel" class="block text-sm font-semibold text-gray-700">Numéro de téléphone *</label>
+          <input type="tel" name="tel" id="tel" required class="w-full p-3 mt-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Email" /></br></br>
         </div>
 
         <div class="mb-4">
@@ -73,13 +78,13 @@
       </div>
 
       <div class="mb-6">
-        <label for="bio" class="block text-sm font-semibold text-gray-700">Ecrivez votre bio, Pourquoi pensez-vous être un bon professeur ?</label>
+        <label for="bio" class="block text-sm font-semibold text-gray-700">Ecrivez votre bio, une petite phrase pour vous résumer</label>
         <textarea name="bio" id="bio" required class="w-full p-3 mt-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" rows="4" placeholder="Expliquez vos motivations"></textarea>
       </div>
 
       <div class="mb-6">
-        <label for="courses" class="block text-sm font-semibold text-gray-700">Quels cours souhaitez-vous enseigner ?</label>
-        <textarea name="courses" id="courses" required class="w-full p-3 mt-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" rows="4" placeholder="Liste des cours à enseigner"></textarea>
+        <label for="courses" class="block text-sm font-semibold text-gray-700">Quels sont les coordonnées de votre école ?</label>
+        <textarea name="courses" id="courses" required class="w-full p-3 mt-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" rows="4" placeholder="(Addrese, N° de tel, email, etc)"></textarea>
       </div>
     </section>
 
@@ -98,7 +103,7 @@
       <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700">S'inscrire</button>
 
       <div class="text-center mt-4">
-        <span class="text-sm text-gray-600">Vous avez déjà un compte ? </span><a href="/teacher/login" class="text-blue-600 font-semibold">Se Connecter</a>
+        <span class="text-sm text-gray-600">Vous avez déjà un compte ? </span><a href="/auth/login" class="text-blue-600 font-semibold">Se Connecter</a>
       </div>
     </form>
   </div>

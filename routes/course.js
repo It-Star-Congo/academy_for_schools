@@ -24,8 +24,10 @@ const upload = multer({ storage: storage });
 // Route pour afficher le formulaire
 router.get('/add', async (req, res) => {
 
-  const classes = await Class.findAll({where : {schoolId: req.session.user.schoolId}})
-    res.render('new-course', {classes});
+  const classes = await Class.findAll({where : {schoolId: req.session.user.schoolId}});
+  const teachers = await User.findAll({where : {schoolId: req.session.user.schoolId, role: 'teacher'}});
+  console.log(teachers[0]);
+    res.render('new-course', {classes, teachers, selectedTeachers: []});
 });
 
 // Route pour recuperer tous les cours
@@ -265,7 +267,7 @@ router.post('/add', upload.fields([
     { name: 'documents', maxCount: 10 } // Autorise jusqu'à 10 fichiers
 ]), async (req, res) => {
     try {
-        const { name, description, teacher, price, classId, filesnames } = req.body;
+        const { name, description, teacher, price, classId, filesnames, teachers } = req.body;
         const imagePath = req.files.image ? `/uploads/images/${req.files.image[0].filename}` : null;
         
         // Stocke les fichiers sous forme de tableau
@@ -283,6 +285,7 @@ router.post('/add', upload.fields([
             name,
             description,
             teacher,
+            //teachers,
             price,
             image: imagePath,
             documents: documentObjects,

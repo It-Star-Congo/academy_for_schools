@@ -1,3 +1,10 @@
+<head>
+    <!-- CSS Tom Select -->
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+<!-- JS Tom Select (build complet avec plugins) -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
+</head>
 <main class="form-container">
     <h2>Ajouter un nouveau cours</h2>
 
@@ -13,9 +20,31 @@
         </div>
 
         <div class="form-group">
-            <label for="teacher">Nom du professeur (Mettez votre Username si voulez etre titulaire):</label>
-            <input type="text" id="teacher" name="teacher" required>
+            <label for="teacher">Nom du Titulaire (Mettez votre Username si voulez etre titulaire) :</label>
+            <select name="teacher" id="teacher" required>
+            <option value="">Aucun
+                 </option>
+            <% teachers.forEach(teacher => { %>
+                <option value="<%= teacher.username %>"><%= teacher
+                    .name %> <%= teacher.firstname %></option>
+            <% }); %>
+            </select>
         </div>
+
+        <div class="form-group">
+            <label for="teachers">Nom des Enseignants secondaires (optionnel) :</label>
+            <select id="teachers" name="teachers[]" multiple placeholder="Sélectionner un ou plusieurs enseignants…">
+                <% teachers.forEach(t => { %>
+                <option
+                    value="<%= t.id %>"
+                    <%= Array.isArray(selectedTeachers) && selectedTeachers.map(String).includes(String(t.id)) ? 'selected' : '' %>
+                >
+                    <%= t.name %> <%= t.firstname %>
+                </option>
+                <% }) %>
+            </select>
+        </div>
+
 
         <div class="form-group">
             <label for="price">Prix du cours :</label>
@@ -65,4 +94,25 @@
     container.appendChild(div);
     }
     </script>
+
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+  new TomSelect('#teachers', {
+    plugins: {
+      checkbox_options: {},        // ✅ cases à cocher dans la liste
+      remove_button: { title: 'Retirer' } // petite croix sur les tags sélectionnés
+    },
+    maxItems: null,                // pas de limite
+    closeAfterSelect: false,       // reste ouvert pour cocher plusieurs
+    allowEmptyOption: true,
+    placeholder: 'Sélectionner un ou plusieurs enseignants…',
+    render: {
+      // Optionnel : affiche proprement les labels dans le dropdown
+      option: (data, escape) => `<div>${escape(data.text)}</div>`
+    }
+  });
+});
+</script>
+
+
 </main>

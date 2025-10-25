@@ -4,6 +4,7 @@
       <% courses.forEach(course => { %>
         <div class="border rounded-xl p-4 shadow hover:shadow-lg transition">
           <h3 class="text-lg font-bold"><%= course.name %></h3>
+          <h4 class="text-lg font-bold"><%= course.teacher %></h4>
           <p class="text-sm text-gray-600">Inscriptions :  <%= course.students?.length || 0 %></p>
           <div class="mt-4 flex flex-wrap ">
             <a href="/teacher/courses/<%= course.id %>/students" class="text-sm text-blue-600 hover:underline mr-4 mb-2">Voir les élèves</a>

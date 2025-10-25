@@ -1,60 +1,36 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title>Gérer les cours – <%= cls.name %></title>
-  <style>
-    :root {
-      --primary-color:   <%= theme.primaryColor %>;
-      --secondary-color: <%= theme.secondaryColor %>;
-      --font-family:     '<%= theme.fontFamily %>';
-    }
-  </style>
-  <link rel="stylesheet" href="/css/main.css">
-</head>
-<body>
-  <header>
-    <h1>📋 Gérer les cours – <%= cls.name %></h1>
-    <a href="/admin/classes" class="btn-secondary">← Retour aux classes</a>
-  </header>
+<form action="/admin/classes/<%= cls.id %>/courses" method="POST">
+  <p>Ajouter des cours :</p>
+  <ul>
+    <% allCoursesWithoutClass.forEach(course => { %>
+      <li>
+        <label>
+          <input
+            type="checkbox"
+            name="courses"
+            value="<%= course.id %>"
+          >
+          <%= course.displayName || course.name %>
+        </label>
+      </li>
+    <% }) %>
+  </ul>
 
-  <main>
-    <form action="/admin/classes/<%= cls.id %>/courses" method="POST">
-      <p> Ajuter des cours : </p>
-      <ul>
-        <% allCoursesWithoutClass.forEach(course => { %>
-          <li>
-            <label>
-              <input
-                type="checkbox"
-                name="courses"
-                value="<%= course.id %>"
-                <% if (cls.courses.map(s => s.id).includes(course.id)) { %>checked<% } %>
-              >
-              <%= course.displayName || course.name %>
-            </label>
-          </li>
-        <% }) %>
-      </ul>
+  <p>Cours déjà liés :</p>
+  <ul>
+    <% cls.Courses.forEach(course => { %>
+      <li>
+        <label>
+          <input
+            type="checkbox"
+            name="courses"
+            value="<%= course.id %>"
+            checked
+          >
+          <%= course.displayName || course.name %>
+        </label>
+      </li>
+    <% }) %>
+  </ul>
 
-      <p> Cours déjà liés : </p>
-      <ul>
-        <% linkedCourses.forEach(course => { %>
-          <li>
-            <label>
-              <input
-                type="checkbox"
-                name="courses"
-                value="<%= course.id %>"
-                <% if (cls.courses.map(s => s.id).includes(course.id)) { %>checked<% } %>
-              >
-              <%= course.displayName || course.name %>
-            </label>
-          </li>
-        <% }) %>
-      </ul>
-      <button type="submit" class="btn-primary">Enregistrer</button>
-    </form>
-  </main>
-</body>
-</html>
+  <button type="submit" class="btn-primary">Enregistrer</button>
+</form>

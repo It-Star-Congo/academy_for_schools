@@ -168,6 +168,50 @@ form button[type="submit"]:active {
       <input type="file" name="logo" accept="image/*" class="block" />
     </div>
 
+    <!-- Ajoute ça DANS ton <form> (par ex. juste avant le bouton Enregistrer) -->
+    <div>
+      <label class="block font-semibold">Police du site</label>
+
+      <!-- Sélecteur de police -->
+      <select id="fontFamily" name="fontFamily" class="w-full border p-2 rounded">
+        <!-- Système / web-safe -->
+        <option value="system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
+          <%= (school && school.fontFamily?.startsWith('system-ui')) ? 'selected' : '' %>>
+          Système (recommandé)
+        </option>
+        <option value="Arial, Helvetica, sans-serif" <%= school?.fontFamily==='Arial, Helvetica, sans-serif' ? 'selected' : '' %>>
+          Arial
+        </option>
+        <option value="'Times New Roman', Times, serif" <%= school?.fontFamily==="'Times New Roman', Times, serif" ? 'selected' : '' %>>
+          Times New Roman
+        </option>
+        <option value="Georgia, serif" <%= school?.fontFamily==='Georgia, serif' ? 'selected' : '' %>>
+          Georgia
+        </option>
+        <option value="'Courier New', Courier, monospace" <%= school?.fontFamily==="'Courier New', Courier, monospace" ? 'selected' : '' %>>
+          Courier New
+        </option>
+
+        <!-- Google Fonts (chargées dynamiquement) -->
+        <option value="Inter" <%= school?.fontFamily==='Inter' ? 'selected' : '' %>>Inter</option>
+        <option value="Roboto" <%= school?.fontFamily==='Roboto' ? 'selected' : '' %>>Roboto</option>
+        <option value="Poppins" <%= school?.fontFamily==='Poppins' ? 'selected' : '' %>>Poppins</option>
+        <option value="Montserrat" <%= school?.fontFamily==='Montserrat' ? 'selected' : '' %>>Montserrat</option>
+        <option value="Lora" <%= school?.fontFamily==='Lora' ? 'selected' : '' %>>Lora</option>
+        <option value="Merriweather" <%= school?.fontFamily==='Merriweather' ? 'selected' : '' %>>Merriweather</option>
+        <option value="'Source Sans 3'" <%= school?.fontFamily==="'Source Sans 3'" ? 'selected' : '' %>>Source Sans 3</option>
+      </select>
+
+      <!-- Prévisualisation -->
+      <div id="fontPreview" class="mt-3 p-3 border rounded">
+        <div class="text-sm text-gray-500 mb-1">Aperçu</div>
+        <div id="fontPreviewText" style="font-size: 20px; line-height:1.5;">
+          My School — Aa Bb Cc 0123<br>
+          “L’éducation est l’arme la plus puissante…”
+        </div>
+      </div>
+    </div>
+
     <div>
       <label class="block font-semibold">Email de contact</label>
       <input type="email" name="contactEmail" class="w-full border p-2 rounded" />
@@ -182,6 +226,10 @@ form button[type="submit"]:active {
         <label class="block font-semibold">Adresse</label>
         <input type="text" name="contactAddress" class="w-full border p-2 rounded" />
       </div>
+      <div>
+        <label class="block font-semibold">Sous-domaine souhaité (Vous pourrez mettre votre propre domaine par la suite)</label>
+        <input type="text" name="slug" class="w-full border p-2 rounded" />.it-star-academy.com
+      </div>
     </div>
 
     <button type="submit"
@@ -190,5 +238,60 @@ form button[type="submit"]:active {
     </button>
   </form>
 </div>
+
+<!-- Place ce <script> APRÈS ton formulaire (fin de page) -->
+<script>
+  // Mapping des Google Fonts -> URL CSS (poids courants 400/600)
+  const GOOGLE_FONTS = {
+    'Inter': 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap',
+    'Roboto': 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap',
+    'Poppins': 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap',
+    'Montserrat': 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap',
+    'Lora': 'https://fonts.googleapis.com/css2?family=Lora:wght@400;600&display=swap',
+    'Merriweather': 'https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap',
+    'Source Sans 3': 'https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&display=swap'
+  };
+
+  const sel = document.getElementById('fontFamily');
+  const previewText = document.getElementById('fontPreviewText');
+
+  // Injecte/remplace dynamiquement la balise <link> de Google Fonts si nécessaire
+  function ensureGoogleFontLoaded(fontName) {
+    // supprime ancien link si présent
+    let old = document.getElementById('google-font-dynamic');
+    if (old) old.remove();
+
+    const href = GOOGLE_FONTS[fontName];
+    if (!href) return; // rien à charger pour les web-safe
+
+    const link = document.createElement('link');
+    link.id = 'google-font-dynamic';
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+  }
+
+  // Applique la police au bloc d’aperçu
+  function applyPreview(value) {
+    // value peut être un nom court (Google) OU une stack complète (web-safe)
+    if (GOOGLE_FONTS[value]) {
+      ensureGoogleFontLoaded(value);
+      previewText.style.fontFamily = `'${value}', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif`;
+    } else {
+      ensureGoogleFontLoaded(null);
+      previewText.style.fontFamily = value;
+    }
+  }
+
+  // Au changement de sélection
+  sel.addEventListener('change', () => {
+    applyPreview(sel.value);
+  });
+
+  // Initialisation (prend la valeur du select au chargement)
+  document.addEventListener('DOMContentLoaded', () => {
+    applyPreview(sel.value);
+  });
+</script>
 
 

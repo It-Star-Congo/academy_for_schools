@@ -2,7 +2,6 @@
 const { School } = require('../models');
 
 async function themeLoader(req, res, next) {
-  console.log('themeLoader – session.user =', req.session.user);
 
   let school;
 
@@ -25,17 +24,19 @@ async function themeLoader(req, res, next) {
         secondaryColor: school.secondaryColor,
         fontFamily:     school.fontFamily,
         title:          school.name,
-        logo:           school.logo
+        logo:           school.logo,
+        abonnement:     school.abonnement
       }
     : {
         primaryColor:   '#ff6600',
         secondaryColor: '#ffc600',
         fontFamily:     'sans-serif',
         title:          'Academy',
-        logo:           '/pictures/AcademyLogoTransparent.png'
+        logo:           '/pictures/AcademyLogoTransparent.png',
+        abonnement:     'Academic'
       };
 
-      console.log(res.locals.theme);
+
 
   next();
 }

@@ -37,6 +37,43 @@
 
     </a>
   </div>
+  
+  <div class="apps-section">
+  <div class="apps-header">
+    <h2>Applications</h2>
+    <input id="apps-search" class="apps-search" type="search" placeholder="Rechercher une application…">
+  </div>
+
+  <% if (apps && apps.length > 0) { %>
+    <ul id="apps-grid" class="apps-grid">
+      <% apps.forEach(app => { %>
+        <li class="app-card" data-app="<%= app.name %>">
+          <!-- adapte l'URL si besoin (ex: /teacher?app=...) -->
+          <a class="app-link" href="<%= app.link %>">
+            <div class="app-media">
+              <img
+                class="app-logo"
+                src="<%= app.image %>"
+                alt="Logo <%= app.name %>"
+                onerror="this.src='/pictures/noimage.png';"
+              >
+            </div>
+            <div class="app-body">
+              <h3 class="app-title"><%= app.name %></h3>
+              <div class="app-footer">
+                <span style="font-size:.8rem;color:#464e59;">Application</span>
+                <span class="app-cta">Accéder</span>
+              </div>
+            </div>
+            <span style="font-size:.8rem;color:#64748bd5;"><%= app.category %></span>
+          </a>
+        </li>
+      <% }) %>
+    </ul>
+  <% } else { %>
+    <p class="no-app">Aucune application disponible pour cette école.</p>
+  <% } %>
+</div>
 
   <!--<div class="admin-nav">
     <a class="btn" href="/admin/students">Gérer les élèves</a>
@@ -57,8 +94,13 @@ a {
   --accent: #ff7f50;
   --text-dark: #1a1a1a;
   --text-light: #ffffff;
+  --text: #382b2b;
   --radius: 8px;
   --transition: 0.3s ease;
+
+  --card-bg: #ffffff;
+  --muted: #6b7280;
+  --ring: rgba(13, 110, 253, .35);
 }
 
 .admin-dashboard {
@@ -67,6 +109,7 @@ a {
   padding: 0 20px;
   font-family: 'Segoe UI', Roboto, sans-serif;
   color: var(--text-dark);
+  text-decoration: dashed;
 }
 
 .admin-dashboard h1 {
@@ -172,4 +215,76 @@ a {
   transform: translateY(-2px);
 }
 
+
+
+
+  .apps-section { margin: 28px auto; max-width: 1100px; }
+  .apps-header {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .apps-header h2 { margin:0; color:#0f172a; font-size:1.5rem; font-weight:800; }
+  .apps-search {
+    min-width:260px; padding:10px 12px; border:1px solid #e5e7eb; border-radius:10px;
+    outline:none; transition: box-shadow .2s, border-color .2s;
+  }
+  .apps-search:focus { box-shadow:0 6px 16px rgba(0,0,0,.07); border-color:#cbd5e1; }
+
+  .apps-grid {
+    list-style:none; padding:0; margin: 0;
+    display:grid; gap:16px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+  .app-card {
+    background:#fff; border:1px solid #eef2f7; border-radius:14px;
+    overflow:hidden; box-shadow:0 6px 18px rgba(2,6,23,.06);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .app-card:hover {
+    transform: translateY(-3px);
+    box-shadow:0 12px 28px rgba(2,6,23,.12);
+    border-color:#e5e7eb;
+  }
+  .app-link { display:block; text-decoration:none; color:inherit; height:100%; }
+  .app-media {
+    display:flex; align-items:center; justify-content:center;
+    height:120px; background:linear-gradient(180deg,#f9fafb,#f3f4f6);
+  }
+  .app-logo {
+    width:72px; height:72px; border-radius:12px; object-fit:contain;
+    background:#fff; border:1px solid #e5e7eb; padding:8px;
+  }
+  .app-body { padding:12px 14px; }
+  .app-title {
+    margin:0 0 6px; font-size:1rem; font-weight:800; color:#0b1324; text-transform:capitalize;
+  }
+  .app-footer {
+    display:flex; justify-content:space-between; align-items:center; margin-top:8px;
+  }
+  .app-cta {
+    font-size:.875rem; font-weight:700; padding:8px 10px; border-radius:10px;
+    background:linear-gradient(90deg,#ffcc00,#ffd84a); color:#001a33; border:none;
+  }
+  .no-app {
+    margin: 16px 0; color:#6b7280; padding:14px; border:1px dashed #e5e7eb; border-radius:10px;
+    background:#fafafa;
+  }
+
 </style>
+
+<script>
+  // Filtre rapide côté client
+  (function(){
+    const input = document.getElementById('apps-search');
+    const grid  = document.getElementById('apps-grid');
+    if (!input || !grid) return;
+
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      grid.querySelectorAll('.app-card').forEach(card => {
+        const name = (card.getAttribute('data-app') || '').toLowerCase();
+        card.style.display = name.includes(q) ? '' : 'none';
+      });
+    });
+  })();
+</script>

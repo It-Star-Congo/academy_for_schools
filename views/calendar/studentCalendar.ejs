@@ -1,0 +1,242 @@
+<!-- ====== HEAD ====== -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+<style>
+  /* Container */
+  .calendar-wrap { max-width: 1100px; margin: 30px auto; padding: 0 16px; }
+
+  /* (Lecture seule) on cache le bouton d’ajout */
+  .cal-actions { display:none; }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,.45);
+    display: none; align-items: center; justify-content: center; z-index: 9999;
+  }
+  .modal {
+    width: min(560px, 92vw); background: #fff; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,.2);
+  }
+  .modal__header { padding: 14px 16px; background: #002147; color: #ffcc00; font-weight: 800; }
+  .modal__body   { padding: 16px; display: grid; gap: 12px; }
+  .modal__footer { padding: 12px 16px; display: flex; gap: 10px; justify-content: flex-end; background: #fafafa; }
+
+  .field { display: grid; gap: 6px; }
+  .field label { font-weight: 700; font-size: .95rem; color: #002147; }
+
+  /* Styles d’affichage (pas de champs éditables) */
+  .value { padding: 10px 12px; border: 1px solid #eaeaea; border-radius: 10px; background: #fafafa; }
+  .prewrap { white-space: pre-wrap; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { padding: 4px 8px; border-radius: 999px; border: 1px solid #ddd; background: #fff; }
+
+  .badge { display: inline-block; border-radius: 999px; padding: 2px 10px; font-weight: 700; }
+  .badge.imp-low    { background:#9bb7d4; color:#000; }
+  .badge.imp-normal { background:#4db6ac; color:#fff; }
+  .badge.imp-high   { background:#ffa726; color:#000; }
+  .badge.imp-urgent { background:#ef5350; color:#fff; }
+
+  .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:10px; border:1px solid #e6e6e6; background:#fff; font-weight:700; cursor:pointer; transition: box-shadow .2s; }
+  .btn:hover { box-shadow: 0 6px 14px rgba(0,0,0,.07); }
+  .btn.primary { background: linear-gradient(90deg,#ffcc00,#ffd84a); border-color: #ffcc00; color: #001a33; }
+
+  .two-cols { display:grid; gap:10px; grid-template-columns: 1fr 1fr; }
+  @media (max-width:620px){ .two-cols { grid-template-columns: 1fr; } }
+</style>
+
+<!-- ====== BODY ====== -->
+<div class="calendar-wrap">
+  <!-- Lecture seule: pas de bouton "nouvel événement" -->
+  <div id="calendar"></div>
+</div>
+
+<!-- Modal DÉTAILS (lecture seule) -->
+<div class="modal-backdrop" id="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal__header"><span id="modal-title">Détails de l’événement</span></div>
+    <div class="modal__body">
+      <div class="field">
+        <label>Titre</label>
+        <div id="v-title" class="value"></div>
+      </div>
+
+      <div class="two-cols">
+        <div class="field">
+          <label>Type</label>
+          <div id="v-type" class="value"></div>
+        </div>
+        <div class="field">
+          <label>Importance</label>
+          <div id="v-importance" class="value badge"></div>
+        </div>
+      </div>
+
+      <div class="two-cols">
+        <div class="field">
+          <label>Début</label>
+          <div id="v-start" class="value"></div>
+        </div>
+        <div class="field">
+          <label>Fin</label>
+          <div id="v-end" class="value"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Lieu</label>
+        <div id="v-location" class="value"></div>
+      </div>
+
+      <div class="field">
+        <label>Classe(s) concernée(s)</label>
+        <div id="v-classes" class="chips"></div>
+      </div>
+
+      <div class="field">
+        <label>Description</label>
+        <div id="v-desc" class="value prewrap"></div>
+      </div>
+
+      <div class="field">
+        <label>Notifications</label>
+        <div id="v-notify" class="value"></div>
+      </div>
+    </div>
+    <div class="modal__footer">
+      <button class="btn primary" id="btn-close">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script>
+  // ====== Modal helpers ======
+  const modal = document.getElementById('modal');
+  const openModal  = () => modal.style.display = 'flex';
+  const closeModal = () => modal.style.display = 'none';
+  document.getElementById('btn-close').addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+  // Cibles "view-only"
+  const v = {
+    title:     document.getElementById('v-title'),
+    type:      document.getElementById('v-type'),
+    importance:document.getElementById('v-importance'),
+    start:     document.getElementById('v-start'),
+    end:       document.getElementById('v-end'),
+    location:  document.getElementById('v-location'),
+    classes:   document.getElementById('v-classes'),
+    desc:      document.getElementById('v-desc'),
+    notify:    document.getElementById('v-notify'),
+  };
+
+  // Dictionnaires d’affichage
+  const TYPE_LABEL = { cours:'Cours', devoir:'Devoir', examen:'Examen', evenement:'Événement' };
+  const IMP_LABEL  = { low:'Faible', normal:'Normale', high:'Élevée', urgent:'Urgente' };
+
+  // Palette pour la couleur d’event
+  const PALETTE = {
+    low:    { bg:'#9bb7d4', fg:'#000' },
+    normal: { bg:'#4db6ac', fg:'#fff' },
+    high:   { bg:'#ffa726', fg:'#000' },
+    urgent: { bg:'#ef5350', fg:'#fff' },
+  };
+  const colorFor     = (e) => (PALETTE[e?.importance] || PALETTE.normal).bg;
+  const textColorFor = (e) => (PALETTE[e?.importance] || PALETTE.normal).fg;
+
+  // Classes (pour afficher des chips lisibles)
+  let CLASSES_BY_ID = {};
+  async function loadClasses() {
+    try {
+      const r = await fetch('/admin/api/classes', { credentials:'include' });
+      const classes = await r.json();
+      CLASSES_BY_ID = Object.fromEntries(classes.map(c => [String(c.id), c.name]));
+    } catch (e) {
+      console.error(e);
+      CLASSES_BY_ID = {};
+    }
+  }
+  function renderClassChips(ids) {
+    const list = (ids || []).map(id => CLASSES_BY_ID[String(id)] || `#${id}`);
+    if (!list.length) return '<span class="value">—</span>';
+    return list.map(n => `<span class="chip">${n}</span>`).join('');
+  }
+
+  // Formats
+  function formatHuman(d){
+    if (!d) return '—';
+    const dt = new Date(d);
+    return dt.toLocaleString('fr-FR', { dateStyle:'short', timeStyle:'short' });
+  }
+
+  // ====== Init FullCalendar (lecture seule) ======
+  document.addEventListener('DOMContentLoaded', async function() {
+    await loadClasses();
+
+    const calendarEl = document.getElementById('calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'fr',
+      timeZone: 'local',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,listWeek'
+      },
+      eventDisplay: 'block',
+
+      // Lecture seule
+      selectable: false,
+      editable: false,
+      eventStartEditable: false,
+      eventDurationEditable: false,
+
+      events: async (fetchInfo, success, failure) => {
+        try {
+          const qs = new URLSearchParams({ start: fetchInfo.startStr, end: fetchInfo.endStr });
+          const r = await fetch(`/admin/calendar/events?${qs.toString()}`, { credentials:'include' });
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const data = await r.json();
+
+          success(data.map(e => ({
+            id: e.id,
+            title: e.title,
+            start: e.startDate,
+            end: e.endDate || null,
+            extendedProps: { fullData: e },
+            backgroundColor: colorFor(e),
+            borderColor: colorFor(e),
+            textColor: textColorFor(e),
+          })));
+        } catch (err) {
+          console.error(err);
+          failure(err);
+        }
+      },
+
+      eventClick: (info) => {
+        const ev = info.event.extendedProps.fullData || {};
+
+        document.getElementById('modal-title').textContent = 'Détails de l’événement';
+
+        v.title.textContent       = info.event.title || '—';
+        v.type.textContent        = TYPE_LABEL[ev.type] || ev.type || '—';
+
+        v.importance.textContent  = IMP_LABEL[ev.importance] || ev.importance || 'Normale';
+        v.importance.className    = 'value badge imp-' + (ev.importance || 'normal');
+
+        v.start.textContent       = formatHuman(info.event.start);
+        v.end.textContent         = info.event.end ? formatHuman(info.event.end) : '—';
+
+        v.location.textContent    = ev.location || '—';
+        v.desc.textContent        = ev.description || '—';
+        v.notify.textContent      = ev.notify ? 'Oui' : 'Non';
+
+        v.classes.innerHTML       = renderClassChips(ev.classes);
+
+        openModal();
+      },
+    });
+
+    calendar.render();
+  });
+</script>

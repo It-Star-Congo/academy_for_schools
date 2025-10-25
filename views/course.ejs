@@ -1,4 +1,11 @@
-
+<!--<div class="live-actions">
+  <% if (user && (user.role === 'teacher' || user.role === 'admin')) { %>
+    <button id="btnStart" class="btn btn-start">🚀 Commencer le live</button>
+    <button id="btnEnd"   class="btn btn-end">🛑 Terminer</button>
+  <% } %>
+  <button id="btnJoin" class="btn btn-join" disabled>🔔 Rejoindre le live</button>
+  <span id="liveStatus" class="live-status">Statut : en attente…</span>
+</div> -->
 
     </br> <div class="exercise-link2">  <a href="/courses/forum/<%= courseId %>/forum" >  Voir le forum de ce cours </a></div> </br> </br>
 <div class="course-container3">
@@ -202,6 +209,15 @@ a {
     border: 1px gray unset;
 }
 </style>
+<style>
+  .live-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:16px 0; }
+  .btn { padding:10px 14px; border-radius:10px; border:0; font-weight:700; cursor:pointer; }
+  .btn-start { background: var(--primary-color); color:#fff; }
+  .btn-end { background:#232b4d; color:#cfd6ff; }
+  .btn-join { background:#5a647c; color:#fff; }
+  .btn-join.active { background:#20c997; color:#072218; }
+  .live-status { font-size:12px; color:#566; margin-left:6px; }
+</style>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         var swiper = new Swiper(".mySwiper", {
@@ -226,4 +242,70 @@ a {
             }
         });
     });
-    </script>
+</script>
+
+<script>
+/*  const COURSE_ID   = <%= JSON.stringify(courseId) %>;
+  const COURSE_NAME = <%= JSON.stringify(courseName) %>;
+  const COURSE_SLUG = <%= JSON.stringify(typeof courseSlug !== 'undefined' ? courseSlug : (courseName || '').toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')) %>;
+  const IS_TEACHER  = <%= JSON.stringify(!!(user && (user.role === 'teacher' || user.role === 'admin'))) %>;
+
+  const btnStart = document.getElementById('btnStart');
+  const btnEnd   = document.getElementById('btnEnd');
+  const btnJoin  = document.getElementById('btnJoin');
+  const statusEl = document.getElementById('liveStatus');
+
+  let currentActive = false;
+  let currentRoom   = '';
+
+  function setJoinActive(on) {
+    btnJoin.disabled = !on;
+    btnJoin.classList.toggle('active', !!on);
+  }
+  function updateStatusText(active, roomName) {
+    statusEl.textContent = active ? `Statut : live en cours (${roomName})` : 'Statut : pas de live';
+  }
+
+  async function fetchStatus() {
+    const r = await fetch(`/api/courses/${encodeURIComponent(COURSE_ID)}/meeting/status?courseSlug=${encodeURIComponent(COURSE_SLUG)}`);
+    const data = await r.json();
+    currentActive = !!data.active;
+    currentRoom   = data.roomName || '';
+    setJoinActive(currentActive);
+    updateStatusText(currentActive, currentRoom);
+  }
+
+  // Prof/admin : démarrer => puis redirection vers la vue live
+  if (IS_TEACHER && btnStart) {
+    btnStart.addEventListener('click', async () => {
+      const r = await fetch(`/live/api/courses/${encodeURIComponent(COURSE_ID)}/meeting/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ courseSlug: COURSE_SLUG })
+      });
+      if (r.ok) {
+        window.location.href = `/live/courses/${encodeURIComponent(COURSE_ID)}/live?courseSlug=${encodeURIComponent(COURSE_SLUG)}&courseName=${encodeURIComponent(COURSE_NAME)}`;
+      } else {
+        alert("Impossible de démarrer (droits ?).");
+      }
+    });
+  }
+
+  // Prof/admin : terminer (reste sur la page)
+  if (IS_TEACHER && btnEnd) {
+    btnEnd.addEventListener('click', async () => {
+      await fetch(`/live/api/courses/${encodeURIComponent(COURSE_ID)}/meeting/end`, { method: 'POST' });
+      await fetchStatus();
+    });
+  }
+
+  // Tous : rejoindre => redirection vers la vue live
+  btnJoin.addEventListener('click', () => {
+    if (!currentActive) return;
+    window.location.href = `/live/courses/${encodeURIComponent(COURSE_ID)}/live?courseSlug=${encodeURIComponent(COURSE_SLUG)}&courseName=${encodeURIComponent(COURSE_NAME)}`;
+  });
+
+  // Polling pour passage au vert
+  fetchStatus();
+  setInterval(fetchStatus, 4000);*/
+</script>

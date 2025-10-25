@@ -2,7 +2,7 @@ const express = require('express');
 const fs      = require('fs');
 const path    = require('path');
 const router  = express.Router();
-const { User, Course, Submission, Exercise, Class, School, ClassCourse } = require('../models'); // Assure-toi d'importer tes modèles correctement
+const { User, Course, Submission, Exercise, Class, School, ClassCourse, Event } = require('../models'); // Assure-toi d'importer tes modèles correctement
 const logger = require('../config/logger');
 const limiter = require('../middlewares/rateLimiter'); // 5 req/min
 const bcrypt = require('bcrypt');
@@ -131,12 +131,20 @@ router.get('/logs/export', (req, res) => {
   res.send(JSON.stringify(exportLogs, null, 2));
 });
 
+const nosApps = [
+            { id: 1, name: 'Jitsi', category: "Réunions/Conférences", image: '/pictures/jitsi.png', link: "https://meet.jit.si/"  },
+            { id: 2, name: 'E-mailer', category: "Mailing", image: '/pictures/emailjs.png', link: "/admin/modif/emailer" },
+            { id: 3, name: 'ITSA Student Analytics', category: "Analytics", image: '/pictures/AcademyLogoTransparent-removebg-preview.png', link: "/admin/modif/emailer" },
+            { id: 4, name: 'ITSA IA', category: "AI", image: '/images/javascript.jpg', link:"/admin/modif/emailer" },
+            { id: 4, name: 'Calendemy', category: "Calendrier", image: '/pictures/calendemy.png', link:"/admin/calendar" },
+        ];
+
 
 // Dashboard admin
 router.get('/', async (req, res) => {
   try {
     if (!req.session.user || req.session.user.role != 'admin'){
-      res.redirect('/admin/register');
+      return res.redirect('/admin/register');
     }
     const [studentCount, teacherCount, courseCount, classCount] = await Promise.all([
       User.count({ where: { role: 'student', schoolId: req.session.user.schoolId } }),
@@ -149,7 +157,9 @@ router.get('/', async (req, res) => {
       studentCount,
       teacherCount,
       courseCount,
-      classCount
+      classCount, 
+      apps: nosApps,
+      username: req.session.user.username,
     });
   } catch (err) {
     console.error(err);
@@ -157,10 +167,25 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/register',(req, res) => {
+router.get('/register', async (req, res) => {
     res.render('admin/register');
 });
 
+router.get('/choose-abonnement', async (req, res) => {
+  if (req.session && req.session.user?.abonnement){
+    return res.redirect('/admin/changeAbonnement');
+  }else{
+    res.render('chooseAbonnement');
+  }
+});
+
+router.get('/change-abonnement', async (req, res) => {
+  if (!req.session){
+    return res.redirect('/admin');
+  }else{
+    res.render('changeAbonnement');
+  }
+});
 
 router.post('/register',
   upload.fields([
@@ -169,6 +194,10 @@ router.post('/register',
   ]),
   async (req, res) => {
     try {
+      if (!req.session.abonnement){
+          return res.redirect('/admin/choose-abonnement');
+      }
+      console.log(req.session.abonnement.abonnement);
       const { name, email, password, bio, username, contact, country, birthdate, firstname, offers, level } = req.body;
 
       console.log(req.body);
@@ -202,7 +231,7 @@ router.post('/register',
         birthdate,
         offers,
         level,
-        abonnement: "Basic"
+        abonnement: req.session.abonnement.abonnement
       });
 
       req.session.user = {
@@ -210,7 +239,11 @@ router.post('/register',
         username: user.username,
         profile: user.profile,
         contact: user.email,
-        role: user.role
+        role: user.role,
+        subscriptionType : user.abonnement, 
+        role: user.role,
+        abonnement:user.abonnement,
+        schoolId: user.schoolId
       };
 
       // on redirige vers la config de l’école
@@ -226,8 +259,11 @@ router.post('/register',
 // Affiche le formulaire de config
 router.get('/setup-school', async (req, res) => {
   // tu peux récupérer l’admin si besoin : req.session.user.id
+  const isAdmin = (req.session.user && req.session.user.role == 'admin')
   res.render('admin/setup_school', {
-    action: '/admin/setup-school'
+    action: '/admin/setup-school',
+    school: req.session.user?.schoolId || null,
+    isAdmin
   });
 });
 
@@ -237,31 +273,75 @@ router.post(
   upload.single('logo'),
   async (req, res) => {
     try {
-      const { name, primaryColor, secondaryColor, contactEmail, contactPhone, contactAddress } = req.body;
+      const { name, primaryColor, secondaryColor, contactEmail, contactPhone, contactAddress, fontFamily, slug } = req.body;
       const logoPath = req.file ? `/pr/schoolData/${req.file.filename}` : null;
+      const sId = req.session.user?.schoolId || req.body.schoolId || null;
+      let limitmembers;
 
-      // 1) création de l’école
-      const school = await School.create({
-        name,
-        primaryColor,
-        secondaryColor,
-        logo: logoPath,
-        contactEmail,
-        contactPhone,
-        contactAddress
-      });
+      const abonnement = req.session.user?.abonnement || null;
+      if (abonnement == 'School') {
+        limitmembers = 1000;
+      } else {
+        limitmembers = 10000;
+      }
+      
 
-      // 2) rattachement de l’admin à cette école
-      await User.update(
-        { schoolId: school.id },
-        { where: { id: req.session.user.id } }
-      );
+      let school; // ✅ portée commune
+      if (!sId) {
+        // Création
+        school = await School.create({
+          name,
+          primaryColor,
+          secondaryColor,
+          logo: logoPath || null,
+          contactEmail,
+          contactPhone,
+          contactAddress,
+          fontFamily,
+          slug,
+          admin : req.session.user.id,
+          abonnement,
+          limitmembers
+        });
+
+        // (optionnel) rattacher l’admin à la nouvelle école
+        // await req.user.update({ schoolId: school.id });
+
+        // 2) rattachement de l’admin à cette école
+        await User.update(
+          { schoolId: school.id },
+          { where: { id: req.session.user.id } }
+        );
+      } else {
+        // Mise à jour
+        school = await School.findByPk(sId);
+        if (!school) return res.status(404).json({ error: "École introuvable" });
+
+        // Ne pas écraser le logo si pas de nouveau fichier
+        const updates = {
+          name,
+          primaryColor,
+          secondaryColor,
+          contactEmail,
+          contactPhone,
+          contactAddress
+        };
+        if (logoPath) updates.logo = logoPath;
+
+        school = await school.update(updates); // renvoie l’instance mise à jour
+      }
+
+      console.log(school.id, school.name);
+
+      
 
       // 3) on peut stocker la school en session si besoin
       req.session.school = { id: school.id, name: school.name };
+      req.session.schoolId = school.id;
+      req.session.user.schoolId = school.id;
 
       // 4) redirection vers le dashboard
-      res.redirect('/admin');
+      return res.redirect('/admin');
     } catch (err) {
       console.error('Erreur setup school:', err);
       res.status(500).render('admin/setup_school', {
@@ -272,6 +352,43 @@ router.post(
   }
 );
 
+router.post(
+  '/editSchool',
+  upload.single('logo'),
+  async (req, res) => {
+    try {
+      if (!req.session.user){
+        res.status(500).render('admin/editSchool', {
+        error: 'Impossible de configurer l’école, réessayez.',
+        action: '/admin/editSchool'
+      });
+      }
+      const { name, primaryColor, secondaryColor, contactEmail, contactPhone, contactAddress, fontFamily, slug, domain } = req.body;
+      const school = await School.findByPk(sId);
+        if (!school) return res.status(404).json({ error: "École introuvable" });
+
+        // Ne pas écraser le logo si pas de nouveau fichier
+        const updates = {
+          name,
+          primaryColor,
+          secondaryColor,
+          contactEmail,
+          contactPhone,
+          contactAddress,
+          fontFamily,
+          slug,
+          domain
+        };
+        if (logoPath) updates.logo = logoPath;
+
+        school = await school.update(updates); // renvoie l’instance mise à jour
+    } catch {
+      res.status(500).render('admin/editSchool', {
+        error: 'Impossible de configurer l’école, réessayez.',
+        action: '/admin/editSchool'
+      });
+    }
+  });
 
 //
 // Gestion des étudiants
@@ -295,12 +412,13 @@ router.post(
       const imagePath = req.file
         ? `/rv/images/${req.file.filename}`
         : null;
-        let password = req.body.paswword;
+      let password = req.body.password;
 
       const hashedPassword = await bcrypt.hash(password + process.env.PEPPER, 12);
+      console.log('pepper: ', process.env.PEPPER);
 
       // 2) Créer l’utilisateur
-      await User.create({
+      const usere = await User.create({
         name:      req.body.name,
         firstname: req.body.firstname,
         username:  req.body.username,
@@ -312,6 +430,7 @@ router.post(
         classId:   req.body.classId,    // lien vers la classe
         profile:   imagePath            // on stocke dans la colonne profile
       });
+      console.log(usere.name, usere.password);
 
       res.redirect('/admin/students');
     } catch (err) {
@@ -374,7 +493,7 @@ router.delete('/students/:id', async (req, res) => {
 // Gestion des professeurs
 //
 router.get('/teachers', async (req, res) => {
-  const teachers = await User.findAll({ where: { role: 'teacher' } });
+  const teachers = await User.findAll({ where: { role: 'teacher', schoolId: req.session.user.schoolId } });
   res.render('admin/teachers', { teachers });
 });
 
@@ -382,7 +501,7 @@ router.get('/teachers/new', (req, res) => {
   res.render('admin/teacher_form', { action: '/admin/teachers', user: {} });
 });
 
-router.post('/teachers', async (req, res) => {
+router.post('/teacherse', async (req, res) => {
   try {
     await User.create({ ...req.body, role: 'teacher' });
     res.redirect('/admin/teachers');
@@ -391,6 +510,44 @@ router.post('/teachers', async (req, res) => {
     res.status(500).send('Erreur création professeur');
   }
 });
+
+router.post(
+  '/teachers',
+  upload.single('image'),           // on prend un seul fichier “image”
+  async (req, res) => {
+    try {
+      // 1) Chemin vers l’image si upload
+      const imagePath = req.file
+        ? `/rv/images/${req.file.filename}`
+        : null;
+      let password = req.body.password;
+
+      const hashedPassword = await bcrypt.hash(password + process.env.PEPPER, 12);
+      console.log('pepper: ', process.env.PEPPER);
+
+      // 2) Créer l’utilisateur
+      const usere = await User.create({
+        name:      req.body.name,
+        firstname: req.body.firstname,
+        username:  req.body.username,
+        birthdate: req.body.birthdate,
+        contact:   req.body.contact,
+        password:  hashedPassword,
+        role:      'teacher',
+        schoolId:  req.session.user.schoolId,
+        classId:   req.body.classId,    // lien vers la classe
+        profile:   imagePath,           // on stocke dans la colonne profile
+        abonnement: req.session.user.abonnement
+      });
+      console.log(usere.name, usere.password);
+
+      res.redirect('/admin/teachers');
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Erreur création étudiant');
+    }
+  }
+);
 
 router.get('/teachers/:id/edit', async (req, res) => {
   const user = await User.findByPk(req.params.id);
@@ -493,6 +650,31 @@ router.get('/classes', async (req, res) => {
   }
 });
 
+// routes/admin.js (assure-toi d'avoir isAuthenticated et isAdmin appliqués avant)
+router.get('/api/classes', async (req, res) => {
+  try {
+    const classes = await Class.findAll({
+      include: [
+        {
+          model: User,
+          as: 'students',
+          attributes: ['id', 'username', 'name', 'profile']
+        },
+        {
+          model: Course,
+          as: 'Courses',
+          attributes: ['id', 'name']
+        }
+      ]
+    });
+
+    res.json(classes);
+  } catch (err) {
+    console.error('Erreur chargement des classes :', err);
+    res.status(500).render('error', { message: 'Impossible de récupérer les classes.' });
+  }
+});
+
 router.get('/classes/new', async (req, res) => {
   try {
 
@@ -538,7 +720,7 @@ router.get('/classes/:id/students', async (req, res) => {
   res.render('admin/editClassStudents', { cls, allStudents, theme: res.locals.theme });
 });
 
-router.get('/classes/:id/courses', async (req, res) => {
+router.get('/classes/:id/courses2', async (req, res) => {
   try {
     const classId = req.params.id;
 
@@ -562,7 +744,7 @@ router.get('/classes/:id/courses', async (req, res) => {
         id: { [Op.notIn]: linkedCourseIds },
         schoolId: req.session.user.schoolId
       }
-    });
+    }); console.log(allCoursesWithoutClass),
 
     // 🖼️ Affichage dans la vue
     res.render('admin/editClassCourses', {
@@ -577,6 +759,37 @@ router.get('/classes/:id/courses', async (req, res) => {
     res.status(500).send("Erreur serveur");
   }
 });
+
+router.get('/classes/:id/courses', async (req, res) => {
+  try {
+    const classId = req.params.id;
+
+    const cls = await Class.findByPk(classId, {
+      include: [{ model: Course, as: 'Courses', attributes: ['id', 'name'] }]
+    });
+    if (!cls) return res.status(404).send("Classe introuvable");
+
+    const linkedCourseIds = cls.Courses.map(c => c.id);
+
+    const allCoursesWithoutClass = await Course.findAll({
+      where: {
+        id: { [Op.notIn]: linkedCourseIds },
+        schoolId: req.session.user.schoolId
+      },
+      attributes: ['id', 'name',]
+    });
+
+    res.render('admin/editClassCourses', {
+      cls,
+      allCoursesWithoutClass,
+      theme: res.locals.theme
+    });
+  } catch (err) {
+    console.error("Erreur route /classes/:id/courses :", err);
+    res.status(500).send("Erreur serveur");
+  }
+});
+
 
 // POST /admin/classes/:id/students — traiter le form
 router.post('/classes/:id/students', async (req, res) => {
@@ -638,7 +851,10 @@ router.post('/school',
         secondaryColor: req.body.secondaryColor,
         contactEmail:   req.body.contactEmail,
         contactPhone:   req.body.contactPhone,
-        contactAddress: req.body.contactAddress
+        contactAddress: req.body.contactAddress,
+        fontFamily: req.body.fontFamily,
+        slug: req.body.slug,
+        domain: req.body.domain
       };
       // Si un nouveau logo a été uploadé
       if (req.file) {
@@ -663,6 +879,132 @@ router.post('/school',
     }
   }
 );
+
+router.post('/classes/:id/courses', async (req, res) => {
+  const classId = req.params.id;
+  console.log("=============================================================");
+  console.log(req.body.courses);
+
+  const selectedIds = Array.isArray(req.body.courses)
+    ? req.body.courses.map(id => parseInt(id, 10))
+    : req.body.courses
+      ? [parseInt(req.body.courses, 10)]
+      : [];
+
+  if (!req.session.user?.schoolId) {
+    return res.status(403).send('Non autorisé.');
+  }
+
+  try {
+    // Classe + élèves
+    const cls = await Class.findByPk(classId, {
+      include: [{ model: User, as: 'students', where: { role: 'student' }, required: false }]
+    });
+    if (!cls) return res.status(404).send('Classe introuvable');
+
+    const studentIds = (cls.students || []).map(s => s.id);
+
+    // Cours actuellement liés (via helpers → plus de souci de noms de colonnes)
+    const current = await cls.getCourses({ joinTableAttributes: [] });
+    const currentIds = current.map(c => c.id);
+
+    // Diffs pour l’inscription élèves
+    const toAddIds    = selectedIds.filter(id => !currentIds.includes(id));
+    const toRemoveIds = currentIds.filter(id => !selectedIds.includes(id));
+
+    // Sync classe ⇄ cours (source of truth = selectedIds)
+    await cls.setCourses(selectedIds);  // <-- évite la casse CourseId/classId
+
+    // Helpers pour élèves ⇄ cours (alias 'students' côté Course⇄User)
+    const addStudentsToCourse = async (courseId, ids) => {
+      if (!ids.length) return;
+      const course = await Course.findByPk(courseId);
+      if (!course) return;
+      await course.addStudents(ids, { ignoreDuplicates: true });
+    };
+    const removeStudentsFromCourse = async (courseId, ids) => {
+      if (!ids.length) return;
+      const course = await Course.findByPk(courseId);
+      if (!course) return;
+      await course.removeStudents(ids);
+    };
+
+    // Inscrire/désinscrire
+    for (const courseId of toAddIds)    await addStudentsToCourse(courseId, studentIds);
+    for (const courseId of toRemoveIds) await removeStudentsFromCourse(courseId, studentIds);
+
+    // Revenir à la liste (si tu préfères rester sur la page: redirige vers `/admin/classes/${classId}/courses`)
+    res.redirect('/admin/classes');
+
+  } catch (err) {
+    console.error('Erreur POST /admin/classes/:id/courses :', err);
+    res.status(500).send('Erreur lors de la mise à jour des cours de la classe.');
+  }
+});
+
+router.get('/api/classes', async (req, res) => {
+  const schoolId = req.session.user?.schoolId || req.query.schoolId;
+  if (!schoolId) return res.status(400).json({ error: 'schoolId requis' });
+
+  const classes = await Class.findAll({
+    where: { schoolId },
+    attributes: ['id', 'name'] // adapte aux colonnes réelles
+  });
+
+  res.json(classes);
+});
+
+
+router.get('/calendar', (req, res) => {
+  if (req.session.user.role === 'teacher' || req.session.user.role === 'admin'){
+    res.render('calendar/calendar');
+  } else {
+    res.render('calendar/studentCalendar'); // va chercher views/calendar.ejs
+  }
+});
+
+// routes/events.js
+router.get('/calendar/events', async (req, res) => {
+  const schoolId = req.session.user?.schoolId || null
+  const { start, end } = req.query;
+  if (!schoolId || !start || !end) return res.status(400).json({ error: 'schoolId, start et end requis' });
+
+  
+
+  const startDate = new Date(start);
+  const endDate   = new Date(end);
+
+  const events = await Event.findAll({
+    where: {
+      schoolId,
+      [Op.and]: [
+        { startDate: { [Op.lt]: endDate } },     // start < endWindow
+        { [Op.or]: [
+            { endDate: { [Op.gte]: startDate } },// end >= startWindow
+            { endDate: null }                // ou sans fin
+        ] }
+      ]
+    },
+    order: [['startDate', 'ASC']]
+  });
+  res.json(events);
+});
+
+router.post('/calendar/events', async (req, res) => {
+  // check role: prof/admin
+  const ev = await Event.create({ ...req.body, schoolId: req.session.user.schoolId, createdById: req.session.user.id });
+  //if (ev.notify) await notificationQueue.add('send', { eventId: ev.id }); // Bull/Redis
+  res.status(201).json(ev);
+});
+
+router.put('/calendar/events/:id', async (req, res) => {
+  const ev = await Event.findByPk(req.params.id);
+  const before = ev.notify;
+  await ev.update(req.body);
+  //if (!before && ev.notify) await notificationQueue.add('send', { eventId: ev.id });
+  res.json(ev);
+});
+
 
 
 

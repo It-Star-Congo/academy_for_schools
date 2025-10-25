@@ -119,6 +119,7 @@ const submissionRoutes = require('./routes/submission');
 const teacherRoutes = require('./routes/teacher');
 const adminRoutes = require('./routes/admin');
 const chatRoutes = require('./routes/chat');
+const liveMemRoutes = require('./routes/live_mem');
 
 
 
@@ -135,6 +136,7 @@ app.use('/exercise', exerciseRoutes);
 app.use('/submissions', submissionRoutes);
 app.use('/teacher', teacherRoutes);
 app.use('/admin', adminRoutes)
+app.use('/live', liveMemRoutes);
 
 // Synchronisation de la base de données
 syncDB();

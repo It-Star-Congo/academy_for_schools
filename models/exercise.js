@@ -37,7 +37,17 @@ module.exports = (sequelize) => {
     linktofile: { 
       type: DataTypes.STRING, // Stocke l'URL ou le chemin vers le devoir
       allowNull: true 
+    },
+    // Champ pour devoir de type fichier à rendre
+    fileType: { 
+      type: DataTypes.STRING, // Le type de fichiers
+      allowNull: true 
+    },
+    fileSize: { 
+      type: DataTypes.STRING, // Stocke l'URL ou le chemin vers le devoir
+      allowNull: true 
     }
+    
   });
 
   return Exercise;

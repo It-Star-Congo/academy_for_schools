@@ -1,32 +1,162 @@
+<!-- HEADER -->
+<h1 class="page-title">
+  <span>Élèves</span>
+  <small class="badge-count"><%= students.length %></small>
+</h1>
 
-<h1>Élèves</h1>
-<a href="/admin/students/new">+ Nouvel élève</a>
-<table>
-  <tr><th>ID</th><th>Nom</th><th>Username</th><th>Actions</th></tr>
-  <% students.forEach(s => { %>
-    <tr>
-      <td><%= s.id %></td>
-      <td><%= s.displayName %></td>
-      <td><%= s.username %></td>
-      <td>
-        <a href="/dash/profile/<%= s.id %>/show">✎</a>
-        <button onclick="deleteItem('/admin/students/<%= s.id %>')">🗑️</button>
-      </td>
-    </tr>
-  <% }) %>
-</table>
+<div class="toolbar">
+  <a href="/admin/students/new" class="btn btn-primary">➕ Nouvel élève</a>
+</div>
+
+<!-- TABLE -->
+<div class="table-wrap">
+  <table class="table students-table">
+    <thead>
+      <tr>
+        <th class="col-id">ID</th>
+        <th>Nom</th>
+        <th>Username</th>
+        <th class="col-actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% students.forEach(s => { %>
+        <tr>
+          <td class="col-id"><%= s.id %></td>
+          <td><%= s.name %></td>
+          <td>@<%= s.username %></td>
+          <td class="col-actions">
+            <a class="icon-btn" href="/dash/profile/<%= s.id %>/show" title="Voir / Éditer">
+              ✎
+            </a>
+            <button class="icon-btn danger" title="Supprimer"
+                    onclick="deleteItem('/admin/students/<%= s.id %>')">
+              🗑️
+            </button>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<!-- JS -->
 <script>
 function deleteItem(url) {
-  if(!confirm('Confirmer suppression ?')) return;
-  fetch(url,{ method:'DELETE' })
-    .then(r=>r.json()).then(() => location.reload());
+  if (!confirm('Confirmer la suppression ?')) return;
+  fetch(url, { method: 'DELETE' })
+    .then(r => r.json())
+    .then(() => location.reload())
+    .catch(() => alert('Suppression impossible.'));
 }
 </script>
-<style>
-  :root {
-        --primary-color: <%= theme.primaryColor %>;
-        --secondary-color: <%= theme.secondaryColor %>;
-        --font-family: '<%= theme.fontFamily %>';
-        }
-</style>
 
+<!-- THEME & CSS -->
+<style>
+  :root{
+    --primary:   <%= theme?.primaryColor || '#2f74ff' %>;
+    --secondary: <%= theme?.secondaryColor || '#6aa1ff' %>;
+    --font:      <%= theme?.fontFamily || "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" %>;
+    --text:      #1a2841;
+    --muted:     #6b7a90;
+    --bg:        #f7f8fb;
+    --card:      #ffffff;
+    --ring:      #e7ecf5;
+    --ring-2:    #dfe6f2;
+    --good:      #16a34a;
+    --danger:    #ef4444;
+  }
+
+  * { box-sizing: border-box }
+  html, body { margin:0; padding:0; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px 16px 48px;
+  }
+
+  /* Title + toolbar */
+  .page-title{
+    display:flex; align-items:center; gap:10px;
+    font-size: clamp(22px, 3.2vw, 30px);
+    font-weight: 800; letter-spacing:.2px; margin: 0 0 12px;
+  }
+  .badge-count{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:34px; height:28px; padding: 0 10px; border-radius:999px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    color:#fff; font-size:.85rem; font-weight:800;
+  }
+  .toolbar{
+    display:flex; justify-content:flex-end; margin: 8px 0 18px;
+  }
+
+  /* Buttons */
+  .btn{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:10px 14px; border-radius:12px; border:1px solid var(--ring);
+    background:#fff; color:var(--text); text-decoration:none; font-weight:700;
+    box-shadow:0 6px 24px rgba(28,44,79,.05); transition:.18s ease;
+  }
+  .btn:hover{ transform: translateY(-1px); box-shadow:0 10px 30px rgba(28,44,79,.08); }
+  .btn-primary{
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border:none; color:#fff;
+  }
+
+  /* Table wrapper (scroll responsive) */
+  .table-wrap{
+    background: var(--card);
+    border: 1px solid var(--ring);
+    border-radius: 16px;
+    box-shadow: 0 10px 26px rgba(28,44,79,.06);
+    overflow: hidden;
+  }
+  .table{
+    width:100%; border-collapse: separate; border-spacing:0;
+    font-size: 15px;
+  }
+  .table thead th{
+    text-align:left; font-weight:800; color:#0f1f3a; letter-spacing:.2px;
+    background: #f3f6fc;
+    border-bottom: 1px solid var(--ring);
+    padding: 14px 16px;
+    position: sticky; top: 0; z-index: 1;
+  }
+  .table tbody td{
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--ring);
+    vertical-align: middle;
+  }
+  .table tbody tr:nth-child(even){
+    background: #fafcff;
+  }
+  .table tbody tr:hover{
+    background: #eef4ff;
+  }
+
+  /* Columns */
+  .col-id{ width: 90px; color: var(--muted); }
+  .col-actions{ width: 140px; text-align: right; }
+
+  /* Action icons */
+  .icon-btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    width: 36px; height: 36px; border-radius: 10px;
+    border: 1px solid var(--ring-2);
+    background:#fff; cursor:pointer; margin-left:6px;
+    font-size:16px; line-height:1; text-decoration:none; color: var(--text);
+    transition:.18s ease; box-shadow:0 3px 10px rgba(28,44,79,.05);
+  }
+  .icon-btn:hover{ transform: translateY(-1px); box-shadow:0 8px 18px rgba(28,44,79,.10); }
+  .icon-btn.danger{ color:#fff; background: linear-gradient(90deg, #f87171, var(--danger)); border:none; }
+  .icon-btn.danger:hover{ filter: brightness(.98); }
+
+  /* Small screens */
+  @media (max-width:760px){
+    .col-id{ display:none; }
+    .col-actions{ width:120px; }
+    .table thead th, .table tbody td{ padding: 12px 12px; }
+  }
+</style>

@@ -1,0 +1,27 @@
+<h1><%= user.id ? 'Modifier professeur' : 'Nouveau professeur' %></h1>
+<form action="<%= action %>" method="POST" enctype="multipart/form-data">
+  <label>Nom complet</label>
+  <input name="name" value="<%= user.name||'' %>" required/>
+  <label for="firstname">Prénom :  *</label>
+  <input type="text" name="firstname" placeholder="Prénom" required />
+  <label>Identifiant</label>
+  <input name="username" value="<%= user.username||'' %>" required/>
+  <label for="birthdate">Date de naissance :  *</label>
+  <input type="date" name="birthdate" required /></br></br>
+  <label for="contact">Email/Telephone :  *</label>
+  <input type="text" name="contact" placeholder="Email/Telephone" /> </br></br>
+  <label for="image">Choisir une photo de profil :</label>
+  <input type="file" id="image" name="image" accept="image/*"></br>
+  <label for="password">Mot de passe </label>
+  <input type="password" name="password" id="password" required>
+  <label for="role">Role<input name="role" value="teacher"  required></label>
+  
+  <button>Enregistrer</button>
+</form>
+<style>
+  :root {
+        --primary-color: <%= theme.primaryColor %>;
+        --secondary-color: <%= theme.secondaryColor %>;
+        --font-family: '<%= theme.fontFamily %>';
+        }
+</style>

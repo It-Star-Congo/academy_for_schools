@@ -62,7 +62,7 @@ router.get('/abonnement', (req, res) => {
     res.render('chooseAbonnement');
 });
 
-router.post('/submit-abonnement', async (req, res) => {
+router.post('/submit-abonnemente', async (req, res) => {
     try {
         const abonnementChoisi = req.body.abonnement;
         const username = req.session.username;
@@ -111,12 +111,15 @@ router.post('/login',limiter,
       
       // Comparer le mot de passe envoyé avec celui dans la base de données (en texte clair)
       let ok = await bcrypt.compare(password + process.env.PEPPER, user.password);
+      console.log(process.env.PEPPER);
+      let ok2 = await bcrypt.hash(password + process.env.PEPPER, 12);
+      console.log(ok2);
       if (!ok) {
         return res.status(400).json({ error: 'Mot de passe incorrect' });
       }
       
       // Si le mot de passe est correct, on crée une session pour l'utilisateur
-      req.session.user = { id: user.id, username: user.username, classId: user.classId, profile: user.profile || '/pictures/AcademyLogoTransparent-removebg-preview.png', email: user.contact, subscriptionType : "Free", credits: user.credits, role: user.role, schoolId: user.schoolId };
+      req.session.user = { id: user.id, username: user.username, classId: user.classId, profile: user.profile || '/pictures/AcademyLogoTransparent-removebg-preview.png', email: user.contact, abonnement: user.abonnement, credits: user.credits, role: user.role, schoolId: user.schoolId };
       
       // Redirection vers le dashboard ou autre page
       // après un login réussi
@@ -156,6 +159,7 @@ router.post('/login',limiter,
           url:      req.originalUrl
         }
       });
+      
       res.redirect('/dash');
       }
     } catch (error) {
@@ -241,8 +245,9 @@ router.post('/register', upload.fields([
             name, 
             offers, 
             level,
-            abonnement : "academic",
-            classId
+            abonnement : "free",
+            classId,
+            schoolId: 1
         });
 
         logger.log({
@@ -257,7 +262,7 @@ router.post('/register', upload.fields([
       });
 
         req.flash('messages', ['Inscription réussie ! Vous pouvez vous connecter maintenant.']);
-        req.session.user = { id: user.id, username: user.username, classId, profile: imagePath, email: user.contact, credits: user.credits, abonnement : "Basic", role: user.role };
+        req.session.user = { id: user.id, username: user.username, classId, profile: imagePath, email: user.contact, credits: user.credits, abonnement : "academic", role: user.role };
         console.log("ok1")
 
         /*req.login(user, err =>
@@ -274,8 +279,50 @@ router.post('/register', upload.fields([
 });
 
 // Déconnexion
-router.get('/logout', (req, res, next) =>
-  req.session = null
-);
+// Déconnexion + retour à l'accueil
+router.post('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error('Erreur destroy session:', err);
+      return res.status(500).send('Impossible de se déconnecter');
+    }
+    // supprime le cookie de session (nom par défaut: connect.sid)
+    res.clearCookie('connect.sid');
+    return res.redirect('/'); // page d'accueil
+  });
+});
+
+router.post('/submit-abonnement', (req, res) => {
+  const abonnement = req.body;
+  console.log(abonnement);
+  req.session.abonnement = abonnement;
+  if(abonnement == "Pro"){
+    res.redirect('/teacher/register');
+  }else{
+    res.redirect('/admin/register');
+  }
+});
+
+router.post('/submit-abonnement-change', async (req, res) => {
+  try{
+  const abonnement = req.body;
+  const users = await User.findAll( {where : {schoolId : req.session.user.schoolId}});
+  const school = await School.findByPk(req.session.user.schoolId);
+  for (const user of users) {
+      await user.update({ abonnement });
+    }
+  await school.update({ abonnement });
+  req.session.user.abonnement = abonnement;
+  res.redirect('/')
+  } catch (err) {
+    console.error(err);
+    req.flash('messages', ['Erreur lors de la mise a jour.']);
+    res.redirect('/admin/change-abonnement');
+  }
+  
+  
+  
+  
+});
 
 module.exports = router;

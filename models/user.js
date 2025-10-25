@@ -51,12 +51,12 @@ module.exports = (sequelize) => {
     },
     offers: { 
       type: DataTypes.BOOLEAN, 
-      allowNull: false, 
+      allowNull: true, 
       defaultValue: false 
     },
     abonnement:{
       type: DataTypes.STRING,
-      defaultValue: 'academic', 
+      defaultValue: 'Free', 
       allowNull: false,
     },
     bio: { 

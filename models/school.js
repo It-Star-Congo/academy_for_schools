@@ -30,8 +30,45 @@ module.exports = (sequelize) => {
     contactAddress: {
       type: DataTypes.STRING,
       allowNull: true
+    },
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    fontFamily: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    abonnement: {
+      type: DataTypes.ENUM('free', 'pro', 'school', 'unlimited'),
+      allowNull: false
+    },
+    admin: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    domain: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    limitmembers: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     }
     // Ajoute ici tout autre paramètre de personnalisation
+    /*
+    apps: {
+      type: DataTypes.JSONB,
+      allowNull: true
+    },
+    paid: {
+      type: DataTypes.BOOLEAN,
+      defaultValue : 'true'
+    },
+    paiementHistory: {
+      type: DataTypes.JSONB,
+      allowNull: true
+    }*/ 
   });
 
   School.associate = (models) => {

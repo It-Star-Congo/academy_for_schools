@@ -31,6 +31,8 @@
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "passport-local-sequelize": "^0.9.1",
+    "pg": "^8.16.3",
+    "pg-hstore": "^2.3.4",
     "pinecone-client": "^2.0.0",
     "sequelize": "^6.37.5",
     "sqlite3": "^5.1.7",

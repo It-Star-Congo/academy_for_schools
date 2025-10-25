@@ -145,7 +145,7 @@ router.post('/add', async (req, res) => {
   try {
     const { title, course, author, type, description } = req.body;
     const lecours = await Course.findByPk(course);
-    let exerciseData = { title, course: lecours.name, author, type, description, CourseId: course };
+    let exerciseData = { title, course: lecours.name, author, type, description, courseId: course };
     console.log(exerciseData);
 
     if (type === 'programmation') {

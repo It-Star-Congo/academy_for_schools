@@ -118,6 +118,21 @@ footer {
     text-decoration: underline;
 }
 
+.link-buttone {
+    background: none; 
+    border: none; 
+    padding: 0;
+    color: white; 
+    font: inherit; 
+    font-size: 1.2rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.link-buttone:hover {
+    text-decoration: underline;
+}
+
 .logo {
     display: flex;
     align-items: center;

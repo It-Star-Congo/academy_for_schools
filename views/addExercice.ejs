@@ -75,6 +75,54 @@
             <textarea name="blanksAnswers" id="blanksAnswers" placeholder='["réponse1", "réponse2"]'></textarea>
         </div>
 
+        <!-- Champs spécifiques à la soumission de fichiers -->
+        <div id="fileFields" style="display:none;">
+            <label for="fileType">Type de fichiers :</label>
+            <select name="fileType" id="fileType" onchange="toggleAllowedExtensions()">
+            <optgroup label="Documents">
+                <option value="word">Word (.docx, .doc, .docm, .dotx)</option>
+                <option value="pdf">PDF (.pdf)</option>
+                <option value="texte">Texte brut (.txt, .md, .rtf)</option>
+                <option value="latex">LaTeX (.tex)</option>
+            </optgroup>
+
+            <optgroup label="Bureautique">
+                <option value="excel">Excel (.xls, .xlsx, .ods, .csv)</option>
+                <option value="presentation">PowerPoint (.ppt, .pptx, .odp)</option>
+            </optgroup>
+
+            <optgroup label="Programmation">
+                <option value="code">Code source (.py, .c, .cpp, .java, .js, .html, .css, .php, .sql)</option>
+                <option value="notebook">Jupyter Notebook (.ipynb)</option>
+            </optgroup>
+
+            <optgroup label="Autres">
+                <option value="image">Images (.png, .jpg, .jpeg, .gif, .svg)</option>
+                <option value="media">Audio / Vidéo (.mp3, .wav, .mp4, .mov)</option>
+                <option value="archive">Archives (.zip, .rar, .tar, .gz, .7z)</option>
+                <option value="all" selected>Tous types</option>
+            </optgroup>
+            </select>
+
+            <br><br>
+
+
+            <label for="fileSize">Taille maximale (en Mo) :</label>
+            <input 
+            type="number" 
+            id="fileSize" 
+            name="fileSize" 
+            min="2" 
+            max="20" 
+            step="1" 
+            placeholder="Ex: 10" 
+            required
+            >
+            <small>Entrez la taille maximale autorisée (par exemple 10 pour 10 Mo)</small>
+
+
+        </div>
+
         <button type="submit" class="btne0">Ajouter</button>
     </form>
 </div>
@@ -152,6 +200,57 @@ function addQuestion() {
     `;
     
     questionWrapper.appendChild(newQuestionBlock);
+}
+</script>
+
+<script>
+function toggleAllowedExtensions() {
+  const type = document.getElementById("type").value;
+  const fileInput = document.getElementById("fileInput");
+  let allowed = "";
+
+  switch (type) {
+    case "word":
+      allowed = ".doc,.docx,.docm,.dotx";
+      break;
+    case "pdf":
+      allowed = ".pdf";
+      break;
+    case "texte":
+      allowed = ".txt,.md,.rtf";
+      break;
+    case "latex":
+      allowed = ".tex";
+      break;
+    case "excel":
+      allowed = ".xls,.xlsx,.ods,.csv";
+      break;
+    case "presentation":
+      allowed = ".ppt,.pptx,.odp";
+      break;
+    case "code":
+      allowed = ".py,.c,.cpp,.java,.js,.html,.css,.php,.sql,.json,.xml";
+      break;
+    case "notebook":
+      allowed = ".ipynb";
+      break;
+    case "image":
+      allowed = ".png,.jpg,.jpeg,.gif,.svg,.bmp";
+      break;
+    case "media":
+      allowed = ".mp3,.wav,.mp4,.mov,.avi,.mkv";
+      break;
+    case "archive":
+      allowed = ".zip,.rar,.tar,.gz,.7z";
+      break;
+    case "all":
+    default:
+      allowed = ""; // autorise tout
+      break;
+  }
+
+  // Met à jour l’attribut accept de l’input
+  fileInput.setAttribute("accept", allowed);
 }
 </script>
 
