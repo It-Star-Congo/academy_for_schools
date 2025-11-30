@@ -40,7 +40,7 @@ module.exports = (sequelize) => {
       allowNull: true
     },
     abonnement: {
-      type: DataTypes.ENUM('Free', 'Pro', 'School', 'Unlimited'),
+      type: DataTypes.ENUM('free', 'pro', 'school', 'unlimited'),
       allowNull: false
     },
     admin: {

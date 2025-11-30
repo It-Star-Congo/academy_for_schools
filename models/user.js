@@ -56,7 +56,7 @@ module.exports = (sequelize) => {
     },
     abonnement:{
       type: DataTypes.STRING,
-      defaultValue: 'Free', 
+      defaultValue: 'free', 
       allowNull: false,
     },
     bio: { 
