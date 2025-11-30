@@ -295,7 +295,7 @@ router.post(
       let limitmembers;
 
       const abonnement = req.session.user?.abonnement || null;
-      if (abonnement == 'School') {
+      if (abonnement == 'school') {
         limitmembers = 1000;
       } else {
         limitmembers = 10000;
