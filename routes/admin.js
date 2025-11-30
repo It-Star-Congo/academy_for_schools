@@ -5,7 +5,7 @@ const router  = express.Router();
 const { User, Course, Submission, Exercise, Class, School, ClassCourse, Event } = require('../models'); // Assure-toi d'importer tes modèles correctement
 const logger = require('../config/logger');
 const limiter = require('../middlewares/rateLimiter'); // 5 req/min
-const isAuthenticated = require('../middlewares/authMiddleware')
+const isAuthenticated = require('../middlewares/authMiddleware');
 const bcrypt = require('bcrypt');
 const {Op} = require('sequelize')
 
