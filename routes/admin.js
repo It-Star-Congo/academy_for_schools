@@ -160,7 +160,7 @@ const nosApps = [
 router.get('/', async (req, res) => {
   try {
     if (!req.session.user || req.session.user.role != 'admin'){
-      return res.redirect('/admin/choose-abonnement');
+      return res.redirect('/admin/register');
     }
     const [studentCount, teacherCount, courseCount, classCount] = await Promise.all([
       User.count({ where: { role: 'student', schoolId: req.session.user.schoolId } }),

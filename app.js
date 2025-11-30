@@ -58,21 +58,19 @@ app.use(expressLayouts);
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-
-// CSRF après les sessions
-
+app.set('trust proxy', 1); // IMPORTANT sur Railway (derrière proxy)
 
 app.use(session({
-    secret: 'ton_secret_deF0uMa_ladeeee2006',
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-      secure   : process.env.NODE_ENV === 'production', // HTTPS obligatoire en prod
-      httpOnly : true,
-      sameSite : 'lax',
-      maxAge   : 24 * 60 * 60 * 1000                    // 1 jour
-    }
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // cookie https seulement en prod
+    sameSite: 'lax',                               // évite les soucis de redirections
+    maxAge: 1000 * 60 * 60 * 24 * 7                // 7 jours
+  }
 }));
+
 
 // Après l'initialisation de express-session
 app.use(flash());  // Ajoute cette ligne pour activer flash
@@ -139,7 +137,7 @@ app.use('/admin', adminRoutes)
 app.use('/live', liveMemRoutes);
 
 // Synchronisation de la base de données
-syncDB();
+//syncDB();
 
 
 app.use((err, req, res, next) => {
@@ -159,6 +157,9 @@ app.use((err, req, res, next) => {          // catch-all erreurs
 
 
 // Lancer le serveur
-app.listen(PORT, () => {
-  console.log(`Serveur en écoute sur le port ${PORT}`);
-});
+(async () => {
+  await syncDB();             // ✅ crée les tables si besoin
+  app.listen(PORT, () => {
+    console.log(`Serveur lancé sur le port ${PORT}`);
+  });
+})();
