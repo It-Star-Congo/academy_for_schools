@@ -1,16 +1,16 @@
-<!DOCTYPE html>
-<html lang="fr">
+
+
 <head>
   <meta charset="utf-8" />
   <title>Live – IT Star Academy</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://meet.jit.si/external_api.js"></script>
+  <script src="https://8x8.vc/vpaas-magic-cookie-431094973c904d04b9310cd0cf6e5b20/external_api.js" async defer></script>
   <style>
     :root { --primary-color: <%= theme.primaryColor %>; --secondary-color: <%= theme.secondaryColor %>; --font-family: '<%= theme.fontFamily %>'; }
     body { margin:0; font-family: var(--font-family), system-ui, Roboto, sans-serif; background:#0b1020; color:#eef1ff; }
-    header { display:flex; align-items:center; gap:10px; padding:12px 16px; border-bottom:1px solid #1b2342; background: linear-gradient(90deg, rgba(55,81,255,.12), rgba(35,43,77,.12)); }
-    header img { height:26px; }
-    header a { margin-left:auto; color:#cfd6ff; text-decoration:none; font-weight:600; }
+    .header { display:flex; align-items:center; gap:10px; padding:12px 16px; border-bottom:1px solid #1b2342; background: linear-gradient(90deg, rgba(55,81,255,.12), rgba(35,43,77,.12)); }
+    .header img { height:26px; }
+    .header a { margin-left:auto; color:#cfd6ff; text-decoration:none; font-weight:600; }
     #wrap { height: calc(100vh - 56px); padding:12px; }
     #jitsi { width:100%; height:100%; border-radius:14px; overflow:hidden; border:1px solid #1b2342; background:#0b1020; position:relative; }
     .itsa-watermark { position:absolute; right:14px; bottom:12px; z-index: 10; display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:8px; background:rgba(0,0,0,.45); color:#fff; }
@@ -18,11 +18,11 @@
   </style>
 </head>
 <body>
-  <header>
+  <div class="header">
     <img src="/pictures/AcademyLogoTransparent.png" alt="ITSA" />
     <strong>IT Star Academy — <%= courseName || 'Classe en direct' %></strong>
-    <a href="/courses/<%= encodeURIComponent(courseId) %>">← Retour au cours</a>
-  </header>
+    <a href="/exercise/course/<%= encodeURIComponent(courseName) %>">← Retour au cours</a>
+  </div>
 
   <div id="wrap">
     <div id="jitsi">
@@ -35,45 +35,68 @@
   </div>
 
   <script>
-    const DOMAIN       = <%= JSON.stringify(domain) %>;
-    const ROOM_NAME    = <%= JSON.stringify(roomName) %>;
-    const ROOM_PASS    = <%= JSON.stringify(roomPassword) %>;
-    const COURSE_NAME  = <%= JSON.stringify(courseName || '') %>;
-    const IS_TEACHER   = <%= JSON.stringify(!!isTeacher) %>;
-    const DISPLAY_NAME = <%= JSON.stringify((user && user.fullName) ? user.fullName : 'Participant ITSA') %>;
+  // Valeurs côté serveur avec fallback sûrs
+  const DOMAIN       = <%- JSON.stringify(domain || '8x8.vc') %>;
+  const RAW_ROOM     = <%- JSON.stringify(roomName || 'itsa-demo-room') %>;
+  const ROOM_NAME    = RAW_ROOM //.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9_-]/g, '');
+  const COURSE_NAME  = <%- JSON.stringify(courseName || '') %>;
+  const IS_TEACHER   = <%- JSON.stringify(!!isTeacher) %>;
+  const DISPLAY_NAME = <%- JSON.stringify((user && user.username) ? user.username : 'Participant ITSA') %>;
+  const USE_LOBBY    = true; // sur meet.jit.si, préférer le lobby
+  console.log("borrel: ", DOMAIN, RAW_ROOM, ROOM_NAME, COURSE_NAME, IS_TEACHER, DISPLAY_NAME, USE_LOBBY);
 
-    let api = null;
-    function mount() {
-      const options = {
-        roomName: ROOM_NAME,
-        parentNode: document.getElementById('jitsi-container'),
-        width: '100%', height: '100%',
-        configOverwrite: {
-          prejoinPageEnabled: false,
-          startWithAudioMuted: true,
-          startWithVideoMuted: true,
-          disableDeepLinking: true,
-          enableLobby: true
-        },
-        interfaceConfigOverwrite: {
-          APP_NAME: 'IT Star Academy Live',
-          MOBILE_APP_PROMO: false,
-          VIDEO_QUALITY_LABEL_DISABLED: true,
-        },
-        userInfo: { displayName: DISPLAY_NAME }
-      };
+  let api = null;
+
+  function mountJitsi() {
+    if (!window.JitsiMeetExternalAPI) {
+      console.error('Jitsi API non chargée');
+      return setTimeout(mountJitsi, 150); // réessaye un court instant
+    }
+
+    const options = {
+      roomName: ROOM_NAME,
+      parentNode: document.getElementById('jitsi-container'),
+      width: '100%',
+      height: '100%',
+      userInfo: { displayName: DISPLAY_NAME },
+      // jwt: "<TON_JWT>" // plus tard, si tu veux les features premium
+      configOverwrite: {
+        prejoinPageEnabled: false,
+        startWithAudioMuted: true,
+        startWithVideoMuted: true,
+        disableDeepLinking: true,
+        // Sur meet.jit.si : password désactivé, utiliser le lobby
+        enableLobby: USE_LOBBY
+      },
+      // interfaceConfigOverwrite est en voie d’obsolescence sur l’instance publique,
+      // mais laissé ici (inoffensif). À retirer si ça génère un warning.
+      interfaceConfigOverwrite: {
+        MOBILE_APP_PROMO: false,
+        VIDEO_QUALITY_LABEL_DISABLED: true
+      }
+    };
+
+    try {
       api = new JitsiMeetExternalAPI(DOMAIN, options);
       api.executeCommand('subject', `IT Star Academy — ${COURSE_NAME}`);
 
-      api.on('participantRoleChanged', (e) => {
-        if (IS_TEACHER && e.role === 'moderator' && ROOM_PASS) api.executeCommand('password', ROOM_PASS);
-      });
-      api.on('passwordRequired', () => {
-        if (ROOM_PASS) api.executeCommand('password', ROOM_PASS);
-      });
+      // Logs utiles
+      api.addListener('videoConferenceJoined', () => console.log('Jitsi: joined'));
+      api.addListener('videoConferenceLeft', () => console.log('Jitsi: left'));
+      api.addListener('readyToClose', () => console.log('Jitsi: readyToClose'));
+
+      // Les mots de passe de salle ne marcheront pas sur meet.jit.si
+      // api.on('passwordRequired', () => { ... })  // inutile ici
+
+      window.addEventListener('beforeunload', () => { try { api?.dispose(); } catch(e){} });
+    } catch (e) {
+      console.error('Échec d’initialisation Jitsi:', e);
     }
-    mount();
-    window.addEventListener('beforeunload', () => { if (api) api.dispose(); });
-  </script>
+  }
+
+  // Lance après que le script ait eu le temps de charger
+  window.addEventListener('load', mountJitsi);
+</script>
+
 </body>
-</html>
+

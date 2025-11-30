@@ -293,12 +293,14 @@ router.post('/logout', (req, res) => {
 });
 
 router.post('/submit-abonnement', (req, res) => {
-  const abonnement = req.body;
+  const abonnement = req.body.abonnement;
   console.log(abonnement);
   req.session.abonnement = abonnement;
-  if(abonnement == "Pro"){
+  if(abonnement === "free"){
     res.redirect('/teacher/register');
-  }else{
+  }else if(abonnement === "pro"){
+    res.redirect('/teacher/register');
+  }else if (abonnement === "school") {
     res.redirect('/admin/register');
   }
 });

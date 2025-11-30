@@ -1,11 +1,17 @@
-<!--<div class="live-actions">
-  <% if (user && (user.role === 'teacher' || user.role === 'admin')) { %>
-    <button id="btnStart" class="btn btn-start">🚀 Commencer le live</button>
-    <button id="btnEnd"   class="btn btn-end">🛑 Terminer</button>
-  <% } %>
-  <button id="btnJoin" class="btn btn-join" disabled>🔔 Rejoindre le live</button>
-  <span id="liveStatus" class="live-status">Statut : en attente…</span>
-</div> -->
+<% if (user.abonnement === 'school' || user.abonnement ==='Free') { %> 
+    <div class="live-actions">
+  
+    <% if (user.role === 'teacher' || user.role === 'admin') { %>
+        <button id="btnStart" class="btn btn-start">🚀 Commencer le live</button>
+        <button id="btnEnd"   class="btn btn-end">🛑 Terminer</button>
+    <% } else  {%>
+  
+        <button id="btnJoin" class="btn btn-join" disabled>🔔 Rejoindre le live</button>
+        <span id="liveStatus" class="live-status">Statut : en attente…</span>
+    <% } %>
+    </div> 
+<% } %>
+
 
     </br> <div class="exercise-link2">  <a href="/courses/forum/<%= courseId %>/forum" >  Voir le forum de ce cours </a></div> </br> </br>
 <div class="course-container3">
@@ -213,6 +219,7 @@ a {
   .live-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:16px 0; }
   .btn { padding:10px 14px; border-radius:10px; border:0; font-weight:700; cursor:pointer; }
   .btn-start { background: var(--primary-color); color:#fff; }
+  .btn-start:active { background: red; color:#fff; }
   .btn-end { background:#232b4d; color:#cfd6ff; }
   .btn-join { background:#5a647c; color:#fff; }
   .btn-join.active { background:#20c997; color:#072218; }
@@ -245,10 +252,11 @@ a {
 </script>
 
 <script>
-/*  const COURSE_ID   = <%= JSON.stringify(courseId) %>;
-  const COURSE_NAME = <%= JSON.stringify(courseName) %>;
-  const COURSE_SLUG = <%= JSON.stringify(typeof courseSlug !== 'undefined' ? courseSlug : (courseName || '').toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')) %>;
-  const IS_TEACHER  = <%= JSON.stringify(!!(user && (user.role === 'teacher' || user.role === 'admin'))) %>;
+  const COURSE_ID   = <%- JSON.stringify(courseId) %>;
+  const COURSE_NAME = <%- JSON.stringify(courseName) %>;
+  const COURSE_SLUG = <%- JSON.stringify(courseId)  %>;
+  const IS_TEACHER  = <%- JSON.stringify(!!(user && (user.role === 'teacher' || user.role === 'admin'))) %>;
+  console.log("les bors: ", COURSE_ID , COURSE_NAME, COURSE_SLUG, IS_TEACHER);
 
   const btnStart = document.getElementById('btnStart');
   const btnEnd   = document.getElementById('btnEnd');
@@ -267,8 +275,16 @@ a {
   }
 
   async function fetchStatus() {
-    const r = await fetch(`/api/courses/${encodeURIComponent(COURSE_ID)}/meeting/status?courseSlug=${encodeURIComponent(COURSE_SLUG)}`);
+    console.log("hela");
+    const r = await fetch(`/live/api/courses/${encodeURIComponent(COURSE_ID)}/meeting/status?courseSlug=${encodeURIComponent(COURSE_SLUG)}`);
+    console.log("on a fetch");
+    console.log("r.ok: ", r.ok);
     const data = await r.json();
+    console.log("datas jsonées");
+    if (r.ok) {
+        //currentActive = true;
+        //currentRoom = COURSE_NAME;
+    }
     currentActive = !!data.active;
     currentRoom   = data.roomName || '';
     setJoinActive(currentActive);
@@ -278,17 +294,26 @@ a {
   // Prof/admin : démarrer => puis redirection vers la vue live
   if (IS_TEACHER && btnStart) {
     btnStart.addEventListener('click', async () => {
+        console.log("okay course btn start");
       const r = await fetch(`/live/api/courses/${encodeURIComponent(COURSE_ID)}/meeting/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ courseSlug: COURSE_SLUG })
       });
       if (r.ok) {
+        alert(r.status);
         window.location.href = `/live/courses/${encodeURIComponent(COURSE_ID)}/live?courseSlug=${encodeURIComponent(COURSE_SLUG)}&courseName=${encodeURIComponent(COURSE_NAME)}`;
       } else {
+        const errorText = await r.text(); // essaye de lire le message d’erreur
+        console.error(`Erreur ${r.status}: ${r.statusText}`);
+        console.log("Détails:", errorText);
+
+        console.log(r.response);
         alert("Impossible de démarrer (droits ?).");
       }
     });
+  } else {
+    console.log("oh ambon");
   }
 
   // Prof/admin : terminer (reste sur la page)
@@ -302,10 +327,11 @@ a {
   // Tous : rejoindre => redirection vers la vue live
   btnJoin.addEventListener('click', () => {
     if (!currentActive) return;
+    console.log("on y eeeeeeeeeest ")
     window.location.href = `/live/courses/${encodeURIComponent(COURSE_ID)}/live?courseSlug=${encodeURIComponent(COURSE_SLUG)}&courseName=${encodeURIComponent(COURSE_NAME)}`;
   });
 
   // Polling pour passage au vert
   fetchStatus();
-  setInterval(fetchStatus, 4000);*/
+  setInterval(fetchStatus, 4000);
 </script>

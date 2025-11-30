@@ -131,7 +131,8 @@ router.post('/course/:courseName/enroll', async (req, res) => {
 router.get('/add', async (req, res) => {  // Ajout de 'async'
   try {
     const courses = await getCoursesByTeacher(req.session.user.username);  // Utilisation correcte de 'await'
-    res.render('addExercice', { courses });
+    const abonnement = req.session.user.abonnement;
+    res.render('addExercice', { courses, abonnement });
   } catch (error) {
     console.error("Erreur lors de la récupération des cours :", error);
     res.status(500).send("Erreur interne du serveur");
@@ -143,7 +144,7 @@ router.get('/add', async (req, res) => {  // Ajout de 'async'
 router.post('/add', async (req, res) => {
   console.log("ehla");
   try {
-    const { title, course, author, type, description } = req.body;
+    const { title, course, author, type, description, price, deadline } = req.body;
     const lecours = await Course.findByPk(course);
     let exerciseData = { title, course: lecours.name, author, type, description, courseId: course };
     console.log(exerciseData);
@@ -196,8 +197,11 @@ router.post('/add', async (req, res) => {
       };
       console.log("Texte à trous :", textWithBlanks);
       console.log("Réponses attendues :", blanksAnswers);
+    }else if (type === 'file') {
+      const {fileSize, fileType, allowedExtensions } = req.body;
+      allowedExtensions2 = JSON.parse(allowedExtensions)
+      exerciseData = { ...exerciseData, fileSize, fileType, allowedExtensions : allowedExtensions2}
     }
-
     console.log('ok2');
 
     let exoo = await Exercise.create(exerciseData);

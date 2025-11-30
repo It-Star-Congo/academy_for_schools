@@ -18,6 +18,14 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true 
     },
+    actif: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
+    },
+    price: { 
+      type: DataTypes.FLOAT,
+      allowNull: true 
+    },
     documents: {  // ➕ Ajout du champ pour les fichiers PDF, MP3, MP4, etc.
       type: DataTypes.JSONB,
       allowNull: true,

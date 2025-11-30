@@ -5,8 +5,8 @@
         <h2><%= user.username %></h2>
         </br>
         <img src="<%= user.profile %>" alt="Photo de profil" class="profile-pic">
-        <p><strong>Email :</strong> <%= user.email %></p>
-        <p><strong>Abonnement :</strong> <%= user.subscriptionType %></p>
+        <p><strong>Email :</strong> <%= user.contact %></p>
+        <p><strong>Abonnement :</strong> <%= user.abonnement %></p>
     </div>
 
     <div class="profile-content">
@@ -21,24 +21,42 @@
                         <div class="progress-bar">
                             <div class="progress" style="width: <%= course.progress %>%;"></div>
                         </div>
-                        <p><%= course.progress %>% complété</p>
+                        <p><%= course.progress? course.progress : 0 %>% complété</p>
                     </div>
                 </div>
             <% }) %>
         </div>
 
-        <!-- Section C : Crédits -->
+        <!-- Section C : Crédits 
         <div class="credits-section">
             <h3>Classe : <span class="credit-amount"><%= user.credits || "S1A" %></span></h3>
             <a href="/recharge" class="btn">Recharger</a>
+        </div>-->
+
+        <!-- Section C : Performances (remplace credits-section) -->
+        <div class="credits-section">
+        <h3>Performance par cours</h3>
+
+        <div class="chart-wrap" style="width:100%; max-width:320px;">
+            <canvas id="coursesChart" aria-label="Graphe des performances par cours" role="img"></canvas>
+        </div>
+
+        <div class="chart-summary" style="margin-top:12px; font-size:0.95rem; color:#333;">
+            <div id="chart-stats">Calcul des performances…</div>
+        </div>
+
+        <div style="margin-top:10px; display:flex; gap:8px; justify-content:center; width:100%;">
+            <button id="downloadChart" class="btn" style="padding:8px 12px; font-size:0.9rem;">Télécharger le graphique</button>
+            <a href="/recharge" class="btn" style="padding:8px 12px; font-size:0.9rem;">Recharger</a>
+        </div>
         </div>
     </div>
 
     <% if (sessionUser && sessionUser.role === 'admin') { %>
     <!-- Section D : Actions (réservé aux admins) -->
     <div class="actions">
-        <a href="/dash/edit-profile/<%= user.id%>/student" class="btn20">Modifier mon profil</a>
-        <a href="/delete-account" class="btn btn-delete" onclick="return confirm('Voulez-vous vraiment supprimer votre compte ?')">Supprimer mon compte</a>
+        <a href="/dash/edit-profile/<%= user.id%>/student" class="btn20">Modifier ce profil</a>
+        <a href="/delete-account" class="btn btn-delete" onclick="return confirm('Voulez-vous vraiment supprimer cet étudiant ?')">Supprimer ce compte</a>
     </div>
     <% } %>
     <style>
@@ -233,3 +251,134 @@
         }
     </style>
 </section>
+
+<!-- Chart.js CDN (nécessaire) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  (function () {
+    // Données depuis le serveur (EJS -> JSON)
+    const courseLabels = <%- JSON.stringify(userCourses.map(c => c.name || 'Cours')) %>;
+    const courseProgress = <%- JSON.stringify(userCourses.map(c => Number(c.progress || 0))) %>;
+
+    // Si pas de cours, on montre un message friendly
+    if (!courseLabels || courseLabels.length === 0) {
+      document.getElementById('chart-stats').textContent = 'Vous n’êtes inscrit à aucun cours pour l’instant.';
+      // cacher le canvas si pas de cours
+      const canvas = document.getElementById('coursesChart');
+      canvas.style.display = 'none';
+      return;
+    }
+
+    // Calculs rapides (moyenne / meilleur cours)
+    const sum = courseProgress.reduce((a,b) => a + b, 0);
+    const avg = (courseProgress.length ? (sum / courseProgress.length).toFixed(1) : 0);
+    const bestIndex = courseProgress.indexOf(Math.max(...courseProgress));
+    const bestCourse = courseLabels[bestIndex] || '—';
+
+    document.getElementById('chart-stats').innerHTML =
+      `Moyenne : <strong>${avg}%</strong> </br> — Meilleure progression : <strong>${bestCourse} (${courseProgress[bestIndex]}%)</strong>`;
+
+    // Setup chart (bar chart)
+    const ctx = document.getElementById('coursesChart').getContext('2d');
+
+    // Use CSS variable for primary color, fallback
+    const rootStyle = getComputedStyle(document.documentElement);
+    const primaryColor = rootStyle.getPropertyValue('--primary-color') || '#3751FF';
+    const secondaryColor = rootStyle.getPropertyValue('--secondary-color') || '#232b4d';
+
+    // Create gradient for bars (nice effect)
+    const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+    try {
+      gradient.addColorStop(0, primaryColor.trim());
+      gradient.addColorStop(1, secondaryColor.trim());
+    } catch (e) {
+      // fallback simple color
+      gradient.addColorStop(0, '#3751FF');
+      gradient.addColorStop(1, '#232b4d');
+    }
+
+    // Destroy existing chart instance if any (safety for SPA)
+    if (window.__coursesChartInstance) {
+      try { window.__coursesChartInstance.destroy(); } catch(e) {}
+      window.__coursesChartInstance = null;
+    }
+
+    window.__coursesChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: courseLabels,
+        datasets: [{
+          label: 'Progression (%)',
+          data: courseProgress,
+          backgroundColor: gradient,
+          borderRadius: 8,
+          barThickness: 18,
+          maxBarThickness: 34,
+        }]
+      },
+      options: {
+        maintainAspectRatio: false,
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const v = context.parsed.y;
+                return `Progression : ${v}%`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              maxRotation: 45,
+              minRotation: 0,
+              autoSkip: false,
+              callback: function(val, index) {
+                // Tronque les labels longs (esthétique)
+                const label = this.getLabelForValue(index);
+                return label.length > 18 ? label.slice(0, 16) + '…' : label;
+              }
+            },
+            grid: { display: false }
+          },
+          y: {
+            beginAtZero: true,
+            suggestedMax: 100,
+            ticks: { callback: function(v) { return v + '%'; } },
+            grid: { color: 'rgba(0,0,0,0.06)' }
+          }
+        },
+        animation: {
+          duration: 750,
+          easing: 'easeOutQuart'
+        }
+      }
+    });
+
+    // Responsive height: set canvas height based on number of courses
+    // (approx 48px per label + padding)
+    const canvasEl = document.getElementById('coursesChart');
+    const calcHeight = Math.max(200, courseLabels.length * 48);
+    canvasEl.style.height = calcHeight + 'px';
+
+    // Download PNG
+    document.getElementById('downloadChart').addEventListener('click', function () {
+      try {
+        const url = canvasEl.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `performances_${(<%- JSON.stringify(user.username || 'user') %>)}.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } catch (e) {
+        alert('Impossible de télécharger le graphique pour le moment.');
+        console.error(e);
+      }
+    });
+  })();
+</script>

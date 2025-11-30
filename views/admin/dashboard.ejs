@@ -90,14 +90,14 @@ a {
     :root {
   --primary: #0052cc;
   --primary-color: <%= theme.primaryColor %>;
-  --secondary: #edf2ff;
+  --secondary: <%= theme.secondaryColor %> #edf2ff;
   --accent: #ff7f50;
   --text-dark: #1a1a1a;
   --text-light: #ffffff;
   --text: #382b2b;
   --radius: 8px;
   --transition: 0.3s ease;
-
+  --font-family: <%= theme.fontFamily %>;
   --card-bg: #ffffff;
   --muted: #6b7280;
   --ring: rgba(13, 110, 253, .35);
@@ -107,7 +107,7 @@ a {
   max-width: 1200px;
   margin: 40px auto;
   padding: 0 20px;
-  font-family: 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-family), 'Segoe UI', Roboto, sans-serif;
   color: var(--text-dark);
   text-decoration: dashed;
 }

@@ -5,8 +5,13 @@ module.exports = (sequelize) => {
     title: { type: DataTypes.STRING, allowNull: false },
     author: { type: DataTypes.STRING, allowNull: false, defaultValue: 'IT-Star' },  
     course: { type: DataTypes.STRING, allowNull: false },
-    type: { type: DataTypes.STRING, allowNull: false }, // 'qcm', 'programmation', 'redaction'
+    type: { type: DataTypes.STRING, allowNull: false }, // 'qcm', 'programmation', 'redaction', 'texte_trous', 'file'
+    poid: { type: DataTypes.INTEGER, allowNull: false },
     description: { type: DataTypes.TEXT, allowNull: false }, 
+    deadline:{ 
+      type: DataTypes.DATEONLY,  // Stocke uniquement la date (YYYY-MM-DD)
+      allowNull: true,
+    },
 
     // Champs pour QCM
     questions: {
@@ -44,8 +49,13 @@ module.exports = (sequelize) => {
       allowNull: true 
     },
     fileSize: { 
-      type: DataTypes.STRING, // Stocke l'URL ou le chemin vers le devoir
+      type: DataTypes.BIGINT, // La taile maximale autorisée du fichier
       allowNull: true 
+    },
+    allowedExtensions: {
+    type: DataTypes.JSONB,   // ex: ["pdf","docx","doc"]
+    allowNull: true,
+    defaultValue: ""
     }
     
   });

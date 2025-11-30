@@ -51,6 +51,7 @@
             <input type="text" id="price" name="price" required>
         </div>
 
+        <% if (noclass === true ){ %>
         <div class="form-group">
             <label for="classId">Classe associée :</label>
             
@@ -61,7 +62,7 @@
             <% }); %>
             </select>
         </div>
-
+        <% } %>
         <div class="form-group">
             <label for="image">Image du cours :</label>
             <input type="file" id="image" name="image" accept="image/*">
@@ -71,7 +72,7 @@
             <label for="documents">Fichiers du cours (PDF, MP3, MP4, etc.) :</label>
             <div id="files-container">
                 <div class="file-group">
-                    <input type="text" name="documentNames[]" placeholder="Nom du fichier (ex : Syllabus)" required>
+                    <input type="text" name="documentNames[]" placeholder="Nom du fichier (ex : Syllabus)" >
                     <input type="file" name="documents" required>
                 </div>
             </div>

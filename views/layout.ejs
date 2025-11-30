@@ -11,7 +11,7 @@
         :root {
         --primary-color: <%= theme.primaryColor %>;
         --secondary-color: <%= theme.secondaryColor %>;
-        --font-family: '<%= theme.fontFamily %>';
+        --font-family: <%= theme.fontFamily %>;
         }
         .navbar{
             background-color: var(--primary-color);
@@ -36,11 +36,17 @@
             <img src="<%= theme.logo %>" alt="Logo" class="logo-img">
             <%= theme.title %>
         </div></a>
-        <ul class="nav-links">
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <ul class="nav-links" id="navLinks">
             <li><a href="/dash">Tableau de bord</a></li>
             <li><a href="/courses/myCourses">Mes cours</a></li>
             <li><a href="/dash/profile3"><%= user ? user.username : "profil" %> </a></li>
-            <% if (user && user.abonnement !== 'free') { %>
+             <% if (user && user.role === 'admin') { %>
+            <li><a href="/admin">Admin-side </a></li>
+            <% } else if (user && user.role === 'teacher') {%>
+            <li><a href="/teacher">Teacher-side </a></li>
+            <% }%>
+            <% if (user && user.abonnement !== 'free' && user.abonnement !== 'pro') { %>
             <li><a href="/admin/calendar">Calendrier </a></li>
             <% }%>
             <li>
@@ -54,18 +60,29 @@
     <div class="content">
         <%- body %>
     </div>
+    <% if (!user) { %>
     <footer>
         <ul class="nav-links2">
             <li><a href="/teacher">Teacher Side</a></li>
             <li><a href="/admin">Admin-side</a></li>
-            <li><a href="/auth/logout">Inscrire mon école</a></li>
+            <li><a href="/admin/choose-abonnement">Inscrire mon école</a></li>
             <li><a href="/courses/myCourses">Qui nous sommes</a></li>
             <li><a href="/dash/privacy">Politique de confidentialité </a></li>
         </ul>
     </footer>
+    <% }%>
     <% if (user && user.abonnement !== 'free') { %>
     <%- include('chat/chat') %>
     <% }%>
+
+    <script>
+    const menuToggle = document.getElementById("menuToggle");
+    const navLinks = document.getElementById("navLinks");
+
+    menuToggle.addEventListener("click", () => {
+        navLinks.classList.toggle("active");
+    });
+</script>
 </body>
 
 

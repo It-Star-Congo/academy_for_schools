@@ -28,7 +28,7 @@
                 <h3 class="titre-ligne-orange"><%= exercise.title %></h3>
                 <p><strong>Auteur :</strong> <%= exercise.author %></p>
                 <p><strong>Date limite :</strong> <%= exercise.deadline ? exercise.deadline : 'Aucune' %></p>
-                <p><strong>Poids de la note :</strong> <%= exercise.weight ? exercise.weight : 1 %></p>
+                <p><strong>Poids de la note :</strong> <%= exercise.poid ? exercise.poid : 1 %></p>
                 <p><strong>Nombre d'essais :</strong> <%= attempts ? attempts : 0 %></p>
                 <p><strong>Meilleure note :</strong> <%= bestScore ? bestScore : 0 %>/100</p>
                 
@@ -111,6 +111,23 @@
                 <% }); %>
                 </p>
                 <button class="btne" onclick="submitExercise(event)">Soumettre</button>
+            </form>
+        <% } else if (exercise.type === 'file') { %>
+            <h2>Fichier à rendre</h2>
+            <form id="fileForm" data-type="file">
+              <input type="hidden" name="exerciseId" value="<%= exercise.id %>">
+              
+              <% exercise.questions.forEach((question, index) => { %>
+                <h3><%= question.question %></h3>
+                <% question.options.forEach((option, optIndex) => { %>
+                  <label>
+                    <input type="radio" name="answer-<%= index %>" value="<%= option %>">
+                    <%= option %>
+                  </label><br>
+                <% }); %>
+              <% }); %>
+          
+              <button class="btne" onclick="submitExercise(event)">Soumettre</button>
             </form>
         <% } %> 
         

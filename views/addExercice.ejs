@@ -23,10 +23,19 @@
             <option value="texte_trous">Texte à trous</option>
             <option value="programmation">Programmation</option>
             <option value="redaction">Rédaction</option>
+            <option value="file">Fichier à rendre</option>
         </select>
 
         <label for="description">Description :</label>
         <textarea name="description" id="description" placeholder="Description de l'exercice" required></textarea>
+
+        <label for="description">Poids de la note:</label>
+        <input type="number" name="poid" id="poid" placeholder="Entre 0.0 et 2.0" min="0" max="2" step="0.01" required>
+
+        <%= if (abonnement == "pro") { %>
+            <label for="price">Prix du cours</label>
+            <input type="number" name="price" id="price" placeholder="Le montant du prix du cours (en Dollars)" min="0" max="20 000" step="0.5" required>
+        <%= } %>
 
         <label for="solution">Solution :</label>
         <textarea name="solution" id="solution" placeholder="Solution attendue (si applicable)"></textarea>
@@ -112,13 +121,23 @@
             type="number" 
             id="fileSize" 
             name="fileSize" 
-            min="2" 
+            min="1" 
             max="20" 
             step="1" 
             placeholder="Ex: 10" 
             required
             >
             <small>Entrez la taille maximale autorisée (par exemple 10 pour 10 Mo)</small>
+
+            <label for="allowedExtensions">Extensions autorisées :</label>
+            <input 
+            type="text" 
+            id="allowedExtensions" 
+            name="allowedExtensions" 
+            placeholder="Sélectionnez un type pour voir les extensions"
+            readonly
+            style="width: 100%; background: #f8f8f8; cursor: not-allowed;"
+            >
 
 
         </div>
@@ -178,6 +197,7 @@ function toggleFields() {
     document.getElementById('qcmFields').style.display = (type === 'qcm') ? 'block' : 'none';
     document.getElementById('essayFields').style.display = (type === 'redaction') ? 'block' : 'none';
     document.getElementById('fillBlanksFields').style.display  = (type === 'texte_trous') ? 'block' : 'none';
+    document.getElementById('fileFields').style.display  = (type === 'file') ? 'block' : 'none';
 }
 
 // Fonction pour ajouter une nouvelle question au QCM
@@ -206,7 +226,7 @@ function addQuestion() {
 <script>
 function toggleAllowedExtensions() {
   const type = document.getElementById("type").value;
-  const fileInput = document.getElementById("fileInput");
+  const display = document.getElementById("allowedExtensions");
   let allowed = "";
 
   switch (type) {
@@ -250,7 +270,7 @@ function toggleAllowedExtensions() {
   }
 
   // Met à jour l’attribut accept de l’input
-  fileInput.setAttribute("accept", allowed);
+  display.value = allowed;
 }
 </script>
 

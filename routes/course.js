@@ -23,11 +23,15 @@ const upload = multer({ storage: storage });
 
 // Route pour afficher le formulaire
 router.get('/add', async (req, res) => {
+  let noclass;
+  if (!req.session.user.schoolId || req.session.user.schoolId === 1){
+    noclass == true
+  }
 
   const classes = await Class.findAll({where : {schoolId: req.session.user.schoolId}});
   const teachers = await User.findAll({where : {schoolId: req.session.user.schoolId, role: 'teacher'}});
   console.log(teachers[0]);
-    res.render('new-course', {classes, teachers, selectedTeachers: []});
+    res.render('new-course', {classes, teachers, selectedTeachers: [], noclass});
 });
 
 // Route pour recuperer tous les cours

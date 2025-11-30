@@ -1,95 +1,81 @@
 // routes/chat.js
 const express = require('express');
 const router  = express.Router();
-const { OpenAI } = require('openai');   // récupère la classe OpenAI
+const { OpenAI } = require('openai');
 
-// Initialise l’API OpenAI avec ta clé (depuis .env)
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-
+// On utilise la lib OpenAI, mais en pointant vers Hugging Face Router.
+// Donc pas de crédits OpenAI utilisés, seulement ton token HF.
 const HF_API_TOKEN = process.env.HF_API_TOKEN;
-const HF_MODEL     = 'openai-community/gpt2 '; // bot de dialogue gratuit
+const HF_MODEL     = process.env.HF_MODEL || 'katanemo/Arch-Router-1.5B:hf-inference'; 
+// ↑ modèle d’exemple recommandé dans la doc HF Router (task: chat completion)
 
-/**
- * POST /api/chat
- * Body : { question: string, history?: [{ role, content }] }
- * Répond : { answer: string }
- */
-router.post('/', async (req, res) => {
-  try {
-    const { question, history = [] } = req.body;
+if (!HF_API_TOKEN) {
+  console.warn('[chat] ⚠️ HF_API_TOKEN manquant. Mets-le dans ton .env pour que l’IA fonctionne.');
+}
 
-    // Prompt système
-    const systemPrompt = {
-      role:    'system',
-      content: 'Tu es un assistant support pour la plateforme. Réponds précisément aux questions en te basant sur ton savoir.'
-    };
-
-    // Assemble la conversation
-    const messages = [
-      systemPrompt,
-      ...history,
-      { role: 'user', content: question }
-    ];
-
-    // Appel à l’API
-    const completion = await openai.chat.completions.create({
-      model:       'gpt-4o-mini',  // ou 'gpt-4' si tu y as accès
-      messages,
-      temperature: 0.2,
-      max_tokens:  500
-    });
-
-    const answer = completion.choices[0].message.content;
-    res.json({ answer });
-  } catch (err) {
-    console.error('Erreur /api/chat :', err);
-    res.status(500).json({ error: 'Impossible de contacter l’IA.' });
-  }
+// Client vers Hugging Face Router (OpenAI-compatible)
+const hfClient = new OpenAI({
+  apiKey: HF_API_TOKEN,
+  baseURL: 'https://router.huggingface.co/v1',
 });
 
-
 /**
- * POST /api/chat
- * { question, history }
+ * Handler commun pour /chat et /chat/hugging
+ * Body attendu : { question: string, history?: [{role, content}] }
+ * Réponse : { answer: string } ou { error: string }
  */
-router.post('/hugging', async (req, res) => {
+async function handleChat(req, res) {
   try {
-    const { question, history = [] } = req.body;
+    const { question, history = [] } = req.body || {};
 
-    // On se contente de renvoyer la dernière question pour blenderbot
-    const body = { inputs: { text: question } };
-
-    const hfRes = await fetch(
-      `https://api-inference.huggingface.co/models/${HF_MODEL}`,
-      {
-        headers: {
-          Authorization: `Bearer ${HF_API_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        method: 'POST',
-        body: JSON.stringify(body),
-      }
-    );
-
-    if (!hfRes.ok) {
-      const err = await hfRes.text();
-      console.error('HF error', hfRes.status, err);
-      return res.status(500).json({ error: 'Erreur HF : ' + hfRes.status });
+    if (!question || typeof question !== 'string') {
+      return res.status(400).json({ error: 'question est requise.' });
     }
 
-    const data = await hfRes.json();
-    // HF renvoie [{ generated_text: "..." }]
-    const answer = Array.isArray(data) && data[0].generated_text
-      ? data[0].generated_text
-      : 'Je n’ai pas de réponse pour l’instant.';
+    if (!HF_API_TOKEN) {
+      return res.status(500).json({ error: "HF_API_TOKEN manquant côté serveur." });
+    }
+
+    // On prépare les messages au format OpenAI/HF Router
+    const systemMessage = {
+      role: 'system',
+      content:
+        "Tu es un assistant support pour la plateforme IT Star Academy. " +
+        "Réponds en français, de manière claire, concise et pédagogique.",
+    };
+
+    // history vient déjà sous la forme [{ role: 'user' | 'assistant', content: '...' }]
+    const messages = [
+      systemMessage,
+      ...history,
+      { role: 'user', content: question },
+    ];
+
+    const completion = await hfClient.chat.completions.create({
+      model: HF_MODEL,
+      messages,
+      temperature: 0.3,
+      max_tokens: 256,
+    });
+
+    const answer = completion.choices?.[0]?.message?.content?.trim();
+    if (!answer) {
+      console.error('[chat] Pas de réponse dans completion:', completion);
+      return res.status(500).json({ error: 'Réponse vide de la part du modèle.' });
+    }
 
     return res.json({ answer });
   } catch (err) {
-    console.error('Erreur route /api/chat HF:', err);
-    return res.status(500).json({ error: "Impossible de joindre l'IA gratuite." });
+    console.error('Erreur /chat HF Router:', err);
+    // Essayer de renvoyer un message d’erreur simple au front
+    return res.status(500).json({ error: "Impossible de joindre l'IA (HF Router)." });
   }
-});
+}
+
+// On expose les deux endpoints :
+// - POST /chat         (si un jour tu veux appeler ça directement)
+// - POST /chat/hugging (celui que ta vue chat.ejs utilise déjà)
+router.post('/', handleChat);
+router.post('/hugging', handleChat);
 
 module.exports = router;

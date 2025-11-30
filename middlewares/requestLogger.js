@@ -1,43 +1,50 @@
 // middleware/requestLogger.js
 const morgan = require('morgan');
 const logger = require('../config/logger');
+const getSchoolLogger = require('../config/schoolLogger');
 
-// 1) On déclare un token pour l’IP si nécessaire
+// 1) Token IP
 morgan.token('client-ip', req => req.ip);
 
-// 2) Format JSON avec tout ce qu’il nous faut
+// 2) Format JSON enrichi
 const jsonFormat = (tokens, req, res) => JSON.stringify({
   timestamp: tokens.date(req, res, 'iso'),
   ip:        tokens['client-ip'](req, res),
   method:    tokens.method(req, res),
   url:       tokens.url(req, res),
   status:    tokens.status(req, res),
-  duration:  tokens['response-time'](req, res) + ' ms'
+  duration:  tokens['response-time'](req, res) + ' ms',
+  schoolId: req.session?.user?.schoolId || 'public'
 });
 
-// 3) On exporte Morgan configuré pour produire du JSON
+// 3) Export du middleware Morgan
 module.exports = morgan(jsonFormat, {
   stream: {
     write: message => {
-      // 4) On parse le JSON produit par Morgan
       let entry;
+
+      // 4) Parse sécurisé du JSON
       try {
         entry = JSON.parse(message);
       } catch (err) {
-        // si ça casse, on retombe sur ton flux standard
         return logger.stream.write(message);
       }
-      // 5) On logge avec Winston en injectant tous les champs dans meta
-      logger.log({
+
+      // ✅ 5) Création DYNAMIQUE du logger par école
+      const schoolLogger = getSchoolLogger(entry.schoolId);
+
+      // ✅ 6) Log dans le bon dossier d’école
+      schoolLogger.log({
         level: 'http',
         message: `${entry.method} ${entry.url} → ${entry.status}`,
         meta: {
           category: 'general',
-          ip:        entry.ip,
-          method:    entry.method,
-          url:       entry.url,
-          status:    entry.status,
-          duration:  entry.duration,
+          schoolId: entry.schoolId,
+          ip: entry.ip,
+          method: entry.method,
+          url: entry.url,
+          status: entry.status,
+          duration: entry.duration,
           timestamp: entry.timestamp
         }
       });

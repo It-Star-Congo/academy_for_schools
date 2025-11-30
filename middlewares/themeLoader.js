@@ -36,6 +36,17 @@ async function themeLoader(req, res, next) {
         abonnement:     'Academic'
       };
 
+  if (!school || school.id === 1 ){
+    res.locals.theme = {
+        primaryColor:   '#ff6600',
+        secondaryColor: '#ffc600',
+        fontFamily:     'sans-serif',
+        title:          'Academy',
+        logo:           '/pictures/AcademyLogoTransparent.png',
+        abonnement:     'Academic'
+      };
+  }
+
 
 
   next();

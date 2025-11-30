@@ -11,7 +11,7 @@
     --transition: 0.3s ease;
     --primary-color: <%= theme.primaryColor %>;
     --secondary-color: <%= theme.secondaryColor %>;
-    --font-family: '<%= theme.fontFamily %>';
+    --font-family: <%= theme.fontFamily %>;
     }
   
 
@@ -19,7 +19,7 @@
     max-width: 1000px;
     margin: 40px auto;
     padding: 0 20px;
-    font-family: 'Segoe UI', Roboto, sans-serif;
+    font-family: var(--font-family),'Segoe UI', Roboto, sans-serif;
   }
 
   .admin-classes .header {

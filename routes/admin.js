@@ -46,21 +46,26 @@ const upload = multer({ storage });
 // Les 4 catégories disponibles
 const categories = ['auth', 'interaction', 'profile', 'general'];
 
-router.get('/logs', (req, res) => {
+router.get('/logs', isAuthenticated, (req, res) => {
   const category = req.query.category || 'general';
-  const date     = req.query.date;   // format YYYY-MM-DD
+  const date     = req.query.date; // format YYYY-MM-DD
+  const schoolId = req.session?.user?.schoolId || 'public';
 
-  // 1) liste des fichiers
-  const logDir = path.join(process.cwd(), 'logs', category);
+  // ✅ 1) BON DOSSIER : logs/school-<id>
+  const logDir = path.join(process.cwd(), 'logs', `school-${schoolId}`);
+
   let files = [];
   if (fs.existsSync(logDir)) {
-    files = fs.readdirSync(logDir).filter(f => f.endsWith('.log'));
+    files = fs.readdirSync(logDir)
+      .filter(f => f.startsWith(category))
+      .filter(f => f.endsWith('.log'));
   }
 
-  // 2) extrais les dates
-  const dates = files.map(f => f.replace(`${category}-`, '').replace('.log',''));
+  // ✅ 2) extraire les dates disponibles
+  const dates = files
+    .map(f => f.replace(`${category}-`, '').replace('.log', ''));
 
-  // 3) choisis le fichier
+  // ✅ 3) choisir le bon fichier
   let filename;
   if (date && dates.includes(date)) {
     filename = `${category}-${date}.log`;
@@ -68,10 +73,11 @@ router.get('/logs', (req, res) => {
     filename = `${category}-${dates.sort().reverse()[0]}.log`;
   }
 
-  // 4) lit & parse
+  // ✅ 4) Lire & parser
   let logs = [];
   if (filename) {
     const content = fs.readFileSync(path.join(logDir, filename), 'utf8');
+
     logs = content
       .split('\n')
       .filter(line => line.trim())
@@ -81,23 +87,23 @@ router.get('/logs', (req, res) => {
       });
   }
 
-  // 5) **aplatit** meta dans le log
+  // ✅ 5) Aplatir meta
   logs = logs.map(log => {
     if (log.meta && typeof log.meta === 'object') {
-      // extrait meta et replace tout au 1er niveau
       const { meta, ...rest } = log;
       return { ...rest, ...meta };
     }
     return log;
   });
 
-  // 6) render
+  // ✅ 6) Render
   res.render('admin/logs', {
     categories,
     category,
     dates,
     selectedDate: filename ? filename.replace(`${category}-`, '').replace('.log','') : null,
-    logs
+    logs,
+    schoolId
   });
 });
 
@@ -105,27 +111,36 @@ router.get('/logs', (req, res) => {
  * Export JSON de TOUS les logs d’une catégorie
  * URL : /admin/logs/export?category=auth
  */
-router.get('/logs/export', (req, res) => {
+router.get('/logs/export', isAuthenticated, (req, res) => {
   const category = req.query.category || 'general';
-  const logDir   = path.join(process.cwd(), 'logs', category);
+  const schoolId = req.session?.user?.schoolId || 'public';
+
+  // ✅ BON DOSSIER
+  const logDir = path.join(process.cwd(), 'logs', `school-${schoolId}`);
+
   let exportLogs = [];
 
   if (fs.existsSync(logDir)) {
-    const files = fs.readdirSync(logDir).filter(f => f.endsWith('.log'));
+    const files = fs.readdirSync(logDir)
+      .filter(f => f.startsWith(category))
+      .filter(f => f.endsWith('.log'));
+
     files.forEach(file => {
       const content = fs.readFileSync(path.join(logDir, file), 'utf8');
+
       content
         .split('\n')
         .filter(line => line.trim())
         .forEach(line => {
           try {
             exportLogs.push(JSON.parse(line));
-          } catch (_) { /* ignore */ }
+          } catch (_) {}
         });
     });
   }
 
-  const filename = `${category}-logs.json`;
+  const filename = `school-${schoolId}-${category}-logs.json`;
+
   res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
   res.setHeader('Content-Type', 'application/json');
   res.send(JSON.stringify(exportLogs, null, 2));
@@ -144,7 +159,7 @@ const nosApps = [
 router.get('/', async (req, res) => {
   try {
     if (!req.session.user || req.session.user.role != 'admin'){
-      return res.redirect('/admin/register');
+      return res.redirect('/admin/choose-abonnement');
     }
     const [studentCount, teacherCount, courseCount, classCount] = await Promise.all([
       User.count({ where: { role: 'student', schoolId: req.session.user.schoolId } }),
@@ -341,7 +356,7 @@ router.post(
       req.session.user.schoolId = school.id;
 
       // 4) redirection vers le dashboard
-      return res.redirect('/admin');
+      return res.redirect('/');
     } catch (err) {
       console.error('Erreur setup school:', err);
       res.status(500).render('admin/setup_school', {

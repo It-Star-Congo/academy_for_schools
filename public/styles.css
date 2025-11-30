@@ -1,6 +1,11 @@
+:root {
+    --primary-color: <%= theme.primaryColor %>;
+    --secondary-color: <%= theme.secondaryColor %>;
+    --font-family: <%= theme.fontFamily %>;
+    }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: var(--font-family), Arial, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #f4f4f4;
@@ -90,10 +95,11 @@ footer {
     align-items: center;
     /*background-color: #ff6600;  Orange */
     padding: 15px 30px;
+    height: 25px;
 }
 
 .navbar .logo {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     font-weight: bold;
     color: white;
 }
@@ -136,10 +142,11 @@ footer {
 .logo {
     display: flex;
     align-items: center;
+
 }
 
 .logo-img {
-    height: 40px; /* Ajuste selon la taille souhaitée */
+    height: 25px; /* Ajuste selon la taille souhaitée */
     margin-right: 10px; /* Espace entre le logo et le texte */
     padding: 10px;
     border-radius: 50%;
@@ -380,3 +387,136 @@ footer {
 .error {
     color: red;
 }
+
+
+/* ===================== */
+/*   RESPONSIVE DESIGN   */
+/* ===================== */
+
+/* --- Petits écrans : smartphones --- 
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .logo {
+        width: 100%;
+        justify-content: space-between;
+        font-size: 1rem;
+    }
+
+    .nav-links {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 0.4rem 0.75rem;
+    }
+
+    .nav-links a,
+    .link-buttone {
+        font-size: 0.85rem;
+    }
+
+    .content {
+        margin-top: 1rem;
+        padding: 0 0.85rem;
+    }
+
+    footer {
+        padding: 1rem 0.5rem;
+    }
+
+    .nav-links2 {
+        gap: 0.5rem 1rem;
+        text-align: center;
+    }
+}*/
+
+/* --- Tablettes / petits laptops --- */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .navbar {
+        padding: 0.85rem 1.75rem;
+        z-index: 10000;
+        height: auto;
+    }
+
+    .nav-links {
+        gap: 0.75rem;
+    }
+
+    .content {
+        max-width: 1000px;
+        padding: 0 1.5rem;
+    }
+}
+
+/* --- Grands écrans --- */
+@media (min-width: 1200px) {
+    .navbar {
+        padding: 1rem 3rem;
+        z-index: 11;
+    }
+
+    .content {
+        max-width: 1300px;
+    }
+}
+
+.menu-toggle {
+    display: none;
+    font-size: 1.8rem;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+
+    .menu-toggle {
+        display: block;
+    }
+
+    .navbar {
+        flex-wrap: wrap;
+        height: 45px;
+        z-index: 10000;
+    }
+
+    .nav-links {
+        width: 100%;
+        flex-direction: column;
+        background: var(--primary-color);
+        display: none;
+        border-radius: 0 0 12px 12px;
+        padding: 1rem 0;
+        margin-top: 0.5rem;
+        z-index: 9999;
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .nav-links li {
+        width: 100%;
+        text-align: center;
+    }
+
+    .nav-links a,
+    .link-buttone {
+        width: 100%;
+        display: block;
+        padding: 0.8rem 0;
+        font-size: 1rem;
+    }
+}
+
+
+
+/*Pour que le texte soit bien */
+

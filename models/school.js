@@ -54,9 +54,9 @@ module.exports = (sequelize) => {
     limitmembers: {
       type: DataTypes.INTEGER,
       allowNull: true
-    }
+    },
     // Ajoute ici tout autre paramètre de personnalisation
-    /*
+    
     apps: {
       type: DataTypes.JSONB,
       allowNull: true
@@ -68,7 +68,7 @@ module.exports = (sequelize) => {
     paiementHistory: {
       type: DataTypes.JSONB,
       allowNull: true
-    }*/ 
+    }
   });
 
   School.associate = (models) => {

@@ -215,7 +215,7 @@ router.post('/profile/courses/:courseId/unsubscribe', isAuthenticated, async (re
 router.get('/edit-profile/:userId/student', isAuthenticated, async (req, res) => {
   const userId = req.params.userId;
   const user = await User.findByPk(userId, {
-    include: [{ model: Course, as: 'enrolledCourses', through: { attributes: [] } }]
+    include: [{ model: Course, as: 'enrolledCourses', attributes: { exclude: ['price'] }, through: { attributes: [] } }]
   });
   res.render('edit-profile', { user, courses: user.enrolledCourses });
 });
